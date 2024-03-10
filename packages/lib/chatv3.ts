@@ -2,8 +2,15 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources';
+import { z } from 'zod';
 
-import { AgentModelName, Message, Tool, ToolType } from '@chaindesk/prisma';
+import {
+  Agent,
+  AgentModelName,
+  Message,
+  Tool,
+  ToolType,
+} from '@chaindesk/prisma';
 
 import { handler as datastoreToolHandler } from './agent/tools/datastore';
 import {
@@ -47,6 +54,7 @@ import {
   ToolSchema,
 } from './types/dtos';
 import ChatModel from './chat-model';
+import cleanTextForEmbeddings from './clean-text-for-embeddings';
 import { ModelConfig } from './config';
 import createToolParser from './create-tool-parser';
 import formatMessagesOpenAI from './format-messages-openai';
@@ -77,6 +85,11 @@ export type ChatProps = ChatModelConfigSchema & {
   conversationId?: ChatRequest['conversationId'];
   organizationId: string;
   agentId: string;
+
+  // Behaviors
+  useMarkdown?: boolean;
+  useLanguageDetection?: boolean;
+  restrictKnowledge?: boolean;
 };
 
 const chat = async ({
@@ -97,6 +110,9 @@ const chat = async ({
   organizationId,
   agentId,
   retrievalQuery,
+  useMarkdown,
+  useLanguageDetection,
+  restrictKnowledge,
   ...otherProps
 }: ChatProps) => {
   // Tools
@@ -255,16 +271,16 @@ const chat = async ({
     | Awaited<ReturnType<typeof datastoreToolHandler>>
     | undefined = undefined;
 
-  if (userPrompt?.includes('{context}')) {
-    retrievalData = await datastoreToolHandler({
-      maxTokens: ModelConfig?.[modelName!]?.maxTokens * 0.2,
-      query: retrievalQuery || query,
-      tools: tools,
-      filters: filters,
-      topK: topK,
-      similarityThreshold: 0.7,
-    });
-  }
+  // if (userPrompt?.includes('{context}')) {
+  retrievalData = await datastoreToolHandler({
+    maxTokens: Math.min(ModelConfig?.[modelName!]?.maxTokens * 0.2, 3000), // limit RAG to max 3K tokens
+    query: retrievalQuery || query,
+    tools: tools,
+    filters: filters,
+    topK: topK,
+    similarityThreshold: 0.7,
+  });
+  // }
 
   // Messages
   const truncatedHistory = (
@@ -274,114 +290,187 @@ const chat = async ({
     })
   ).reverse();
 
-  let _systemPrompt = systemPrompt || '';
-
-  if (!!markAsResolvedTool) {
-    _systemPrompt += `\n${MARK_AS_RESOLVED}`;
-  }
-
-  if (!!requestHumanTool) {
-    _systemPrompt += `\n${REQUEST_HUMAN}`;
-  }
-
-  if (!!leadCaptureTool) {
-    _systemPrompt += `\n${createLeadCapturePrompt({
-      isEmailEnabled: !!leadCaptureTool.config.isEmailEnabled,
-      isPhoneNumberEnabled: !!leadCaptureTool.config.isPhoneNumberEnabled,
-      isRequiredToContinue: !!leadCaptureTool.config.isRequired,
-    })}`;
-  }
-
-  const messages: ChatCompletionMessageParam[] = [
-    ...(_systemPrompt
-      ? [
-          {
-            role: 'system',
-            content: _systemPrompt,
-          } as ChatCompletionMessageParam,
-        ]
-      : []),
-    ...truncatedHistory,
-    {
-      role: 'user',
-      content: promptInject({
-        template: userPrompt || '{query}',
-        query: query,
-        context: retrievalData?.context,
-      }),
-    },
-  ];
-
   const model = new ChatModel();
 
-  const openAiTools = [
-    ...formatedHttpTools,
-    ...formatedFormTools,
-    ...(formatedMarkAsResolvedTool ? [formatedMarkAsResolvedTool] : []),
-    ...(formatedRequestHumanTool ? [formatedRequestHumanTool] : []),
-    ...(formatedLeadCaptureTool ? [formatedLeadCaptureTool] : []),
-    ...(nbDatastoreTools > 0
-      ? [
-          {
-            type: 'function',
-            function: {
-              name: 'queryKnowledgeBase',
-              description: `Useful to fetch informations from the knowledge base (${datastoreTools
-                .map((each) => each?.datastore?.name)
-                .join(', ')})`,
-              parameters: {
-                type: 'object',
-                properties: {},
-              },
-              parse: JSON.parse,
-              function: async () => {
-                if (retrievalData) {
-                  return retrievalData.context;
-                }
-
-                retrievalData = await datastoreToolHandler({
-                  maxTokens: ModelConfig?.[modelName!]?.maxTokens * 0.2,
-                  query: retrievalQuery || query,
-                  tools: tools,
-                  filters: filters,
-                  topK: topK,
-                  similarityThreshold: 0.7,
-                });
-                return retrievalData.context;
-              },
-            },
-          } as ChatCompletionTool,
-        ]
-      : []),
-  ] as ChatCompletionTool[];
-
-  console.log(
-    'CHAT V3 PAYLOAD',
-    JSON.stringify(
-      {
-        handleStream: stream,
-        model: ModelConfig[modelName]?.name,
-        messages,
-        temperature: temperature || 0,
-        top_p: otherProps.topP,
-        frequency_penalty: otherProps.frequencyPenalty,
-        presence_penalty: otherProps.presencePenalty,
-        max_tokens: otherProps.maxTokens,
-        signal: abortController?.signal,
-        tools: openAiTools,
-        ...(openAiTools?.length > 0
-          ? {
-              tool_choice: 'auto',
-            }
-          : {}),
-      },
-      null,
-      2
-    )
-  );
-
   try {
-    const output = await model.call({
+    // if (!!markAsResolvedTool) {
+    //   _systemPrompt += `\n${MARK_AS_RESOLVED}`;
+    // }
+
+    // if (!!requestHumanTool) {
+    //   _systemPrompt += `\n${REQUEST_HUMAN}`;
+    // }
+
+    // if (!!leadCaptureTool) {
+    //   _systemPrompt += `\n${createLeadCapturePrompt({
+    //     isEmailEnabled: !!leadCaptureTool.config.isEmailEnabled,
+    //     isPhoneNumberEnabled: !!leadCaptureTool.config.isPhoneNumberEnabled,
+    //     isRequiredToContinue: !!leadCaptureTool.config.isRequired,
+    //   })}`;
+    // }
+
+    const infos = [
+      ...(leadCaptureTool?.config?.isEmailEnabled ? ['email'] : []),
+      ...(leadCaptureTool?.config?.isPhoneNumberEnabled
+        ? ['phone number and phone extension']
+        : []),
+    ].join(' and ');
+
+    const _systemPrompt = `${systemPrompt}${
+      !!leadCaptureTool
+        ? `Start the conversation by greeting the user and asking for his ${infos} in order to contact them if necessary.`
+        : ``
+    }
+    ${
+      !!datastoreTools?.length
+        ? `**Knowledge Base**
+    Use the following knowledge base chunks delimited by <knowledge-base> xml tags to answer the user's question.
+    <knowledge-base>${retrievalData?.context}</knowledge-base>
+    Limit your knowledge this knowledge base, if you don't find an answer in the knowledge base, politely say that you don't know.
+    Remember do not answer any query that is outside of the provided context, this is paramount.`
+        : ``
+    }
+    
+    ${
+      !!markAsResolvedTool || !!requestHumanTool || !!leadCaptureTool
+        ? `**Tasks Instructions**
+    If the conversation falls in one of the following cases, please follow its instructions.`
+        : ``
+    }
+    ${
+      !!markAsResolvedTool
+        ? `**Mark the conversation as resolved**
+    1. If the user is happy with your answers and has no further questions, mark the conversation as resolved. Please ask the user if there is anything else you can help with before marking the conversation as resolved.
+    2. Make sure the user is satisfied with the resolution before marking the conversation as resolved with a question like "Is there anything else I can help you with today?"
+    3. Then mark the conversation as resolved (call the mark_as_resolved tool)
+
+    <example>
+    - You: "You're welcome! Is there anything else I can help you with today?"
+    - User: "No, thank you. You've been very helpful."
+    - Action: Mark the conversation as resolved
+    - You: "If you have any more questions, feel free to ask."
+    </example>`
+        : ``
+    }${
+      !!requestHumanTool
+        ? `**Request Human**
+    1. If the user is not happy with your answers, politely ask the user if he would like to speak to a human operator.
+    2. Then if the user accept to speak to a human, transfer the conversation to a human agent.
+    <example>
+    - User: "I'm not satisfied with your answer."
+    - You: "Would you like to speak to a human agent?"
+    - User: "Yes, please."
+    - Action: Transfer the conversation to a human agent.
+    </example>`
+        : ``
+    }${
+      !!leadCaptureTool
+        ? `**Lead Capture**
+    1. Start the conversation by greeting the user and asking for his ${infos} in order to contact them if necessary.
+    2. If the user provides their ${infos}, confirm receipt.
+    3. If the user does not provide his ${infos}, politely ask again.
+    5. Make sure the ${infos} is/are valid and are not empty before proceeding.
+    4. After the user has provided a valid ${infos}, thank them and save the email whith the lead capture tool.
+    ${
+      leadCaptureTool?.config?.isRequired
+        ? `5. If the user refuses to provide his ${infos}, politely inform the user that you need the ${infos} to continue the conversation. Do not continue until the user has provided valid ${infos}.`
+        : ``
+    }`
+        : ``
+    }
+    ${
+      useLanguageDetection || useMarkdown || useLanguageDetection
+        ? `**Format**`
+        : ``
+    }
+    ${
+      useLanguageDetection
+        ? `Anser in the same language that was used to frame the question. You can speak any language.`
+        : ``
+    }
+    ${
+      useMarkdown
+        ? `Answer using markdown or to display the content in a nice and aerated way.`
+        : ``
+    }
+    ${
+      useLanguageDetection
+        ? `Never make up URLs, email addresses, or any other information that have not been provided during the conversation. Only use information provided by the user to fill forms.`
+        : ``
+    }
+    `;
+
+    // _systemPrompt += `\nStart the conversation by collecting the user informations specified by the lead capture v2 tool.`;
+
+    // _systemPrompt += `\n Finish your answer with a recommendation for a relevant html input element to show the user based on your answer. example:
+
+    // User: Hello,
+    // You: Can you provide your email adress in case we need to contact you later? UI: email
+
+    // Possible values are email, phone, file_upload, none`;
+
+    const messages: ChatCompletionMessageParam[] = [
+      ...(_systemPrompt
+        ? [
+            {
+              role: 'system',
+              content: _systemPrompt,
+            } as ChatCompletionMessageParam,
+          ]
+        : []),
+      ...truncatedHistory,
+      {
+        role: 'user',
+        content: promptInject({
+          template: userPrompt || '{query}',
+          query: query,
+          context: retrievalData?.context,
+        }),
+      },
+    ];
+
+    const openAiTools = [
+      ...formatedHttpTools,
+      ...formatedFormTools,
+      ...(formatedMarkAsResolvedTool ? [formatedMarkAsResolvedTool] : []),
+      ...(formatedRequestHumanTool ? [formatedRequestHumanTool] : []),
+      ...(formatedLeadCaptureTool ? [formatedLeadCaptureTool] : []),
+      // ...(nbDatastoreTools > 0
+      //   ? [
+      //       {
+      //         type: 'function',
+      //         function: {
+      //           name: 'queryKnowledgeBase',
+      //           description: `Useful to fetch informations from the knowledge base (${datastoreTools
+      //             .map((each) => each?.datastore?.name)
+      //             .join(', ')})`,
+      //           parameters: {
+      //             type: 'object',
+      //             properties: {},
+      //           },
+      //           parse: JSON.parse,
+      //           function: async () => {
+      //             if (retrievalData) {
+      //               return retrievalData.context;
+      //             }
+
+      //             retrievalData = await datastoreToolHandler({
+      //               maxTokens: ModelConfig?.[modelName!]?.maxTokens * 0.2,
+      //               query: retrievalQuery || query,
+      //               tools: tools,
+      //               filters: filters,
+      //               topK: topK,
+      //               similarityThreshold: 0.7,
+      //             });
+      //             return retrievalData.context;
+      //           },
+      //         },
+      //       } as ChatCompletionTool,
+      //     ]
+      //   : []),
+    ] as ChatCompletionTool[];
+
+    const callParams = {
       handleStream: stream,
       model: ModelConfig[modelName]?.name,
       messages,
@@ -397,7 +486,11 @@ const chat = async ({
             tool_choice: 'auto',
           }
         : {}),
-    });
+    } as Parameters<typeof model.call>[0];
+
+    console.log('CHAT V3 PAYLOAD', JSON.stringify(callParams, null, 2));
+
+    const output = await model.call(callParams);
 
     const answer = output?.answer;
 

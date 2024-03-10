@@ -7,7 +7,6 @@ import { Box, CircularProgress, IconButton, Stack, Typography } from '@mui/joy';
 import Avatar from '@mui/joy/Avatar';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { SessionProvider } from 'next-auth/react';
 import React, { ReactElement, useEffect, useMemo } from 'react';
 import superjson from 'superjson';
 import useSWR from 'swr';
@@ -23,8 +22,9 @@ import { AgentInterfaceConfig } from '@chaindesk/lib/types/models';
 import { Agent, Prisma } from '@chaindesk/prisma';
 import { prisma } from '@chaindesk/prisma/client';
 
-export default function AgentPage(props: { agent: Agent }) {
-  const agentId = props.agent?.id;
+export default function AgentPage() {
+  const router = useRouter();
+  const agentId = router?.query?.agentId as string;
 
   const [state, setState] = useStateReducer({
     isPageReady: false,
@@ -32,8 +32,9 @@ export default function AgentPage(props: { agent: Agent }) {
     config: {},
   });
 
+  const baseUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL;
   const getAgentConfigQuery = useSWR<Prisma.PromiseReturnType<typeof getAgent>>(
-    `/api/agents/${agentId}`,
+    !!agentId ? `${baseUrl}/api/agents/${agentId}` : null,
     fetcher
   );
 
@@ -53,17 +54,17 @@ export default function AgentPage(props: { agent: Agent }) {
         setState({
           isPageReady: true,
         });
-      }, 2000);
+      }, 300);
     }
   }, [getAgentConfigQuery?.isLoading]);
 
   return (
     <>
-      <SEO
+      {/* <SEO
         title={`${props?.agent?.name} - made with Chaindesk`}
         description={props?.agent?.description}
         url={`https://chaindesk.ai/@${props?.agent?.handle}`}
-      />
+      /> */}
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" />
@@ -153,17 +154,17 @@ export default function AgentPage(props: { agent: Agent }) {
             >
               <Avatar
                 alt={agent?.name}
-                src={agent?.iconUrl || '/app-rounded-bg-white.png'}
+                src={agent?.iconUrl || '/logo.png'}
                 sx={{
                   bgcolor: 'white',
                   boxShadow: 'sm',
                   width: {
                     xs: 34,
-                    sm: 54,
+                    // sm: 54,
                   },
                   height: {
                     xs: 34,
-                    sm: 54,
+                    // sm: 54,
                   },
                 }}
               />
@@ -179,6 +180,7 @@ export default function AgentPage(props: { agent: Agent }) {
                   fontWeight={'bold'}
                   sx={{
                     color: textColor,
+                    fontFamily: 'Bricolage Grotesque',
                   }}
                 >
                   {agent?.name}
@@ -499,7 +501,7 @@ export default function AgentPage(props: { agent: Agent }) {
                 width: '100%',
                 height: '100%',
               }}
-              src={`/agents/${agentId}/iframe?primaryColor="#ffffff"`}
+              src={`${baseUrl}/agents/${agent?.id}/iframe?primaryColor="#ffffff"`}
               frameBorder="0"
             />
           </Stack>
@@ -513,54 +515,59 @@ AgentPage.getLayout = function getLayout(page: ReactElement) {
   return <IFrameThemeProvider>{page}</IFrameThemeProvider>;
 };
 
-export async function getStaticPaths() {
-  const all: string[] = [];
+// export async function getStaticPaths() {
+//   const all: string[] = [];
 
-  return {
-    paths: all.map((path) => {
-      return { params: { site: path } };
-    }),
-    fallback: 'blocking',
-  };
-}
+//   return {
+//     paths: all.map((path) => {
+//       return { params: { site: path } };
+//     }),
+//     fallback: 'blocking',
+//   };
+// }
 
-export async function getStaticProps({
-  params: { agentId },
-}: {
-  params: {
-    agentId: string;
-  };
-}) {
-  let agent = null;
+// export async function getStaticProps({
+// {
+//   params: { agentId },
+// }: {
+//   params: {
+//     agentId: string;
+//   };
+// })
+// export async function getServerSideProps(context: any) {
+//   const agentId = context.params.agentId as string;
+//   let agent = null;
 
-  if (agentId.startsWith('@')) {
-    const handle = agentId.replace('@', '');
+//   if (agentId.startsWith('@')) {
+//     const handle = agentId.replace('@', '');
 
-    agent = await prisma.agent.findUnique({
-      where: {
-        handle,
-      },
-    });
-  } else {
-    agent = await prisma.agent.findUnique({
-      where: {
-        id: agentId,
-      },
-    });
-  }
+//     agent = await prisma.agent.findUnique({
+//       where: {
+//         handle,
+//         visibility: 'public',
+//       },
+//     });
+//   } else {
+//     agent = await prisma.agent.findUnique({
+//       where: {
+//         id: agentId,
+//         visibility: 'public',
+//       },
+//     });
+//   }
 
-  if (!agent) {
-    return {
-      redirect: {
-        destination: `/`,
-      },
-    };
-  }
+//   if (!agent) {
+//     return {
+//       redirect: {
+//         destination: `/`,
+//       },
+//     };
+//   }
 
-  return {
-    props: {
-      agent: superjson.serialize(agent).json || null,
-    },
-    revalidate: 10,
-  };
-}
+//   return {
+//     props: {
+//       agent: superjson.serialize(agent).json || null,
+//     },
+//     // revalidate: 10,
+//   };
+// }

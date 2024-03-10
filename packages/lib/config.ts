@@ -15,16 +15,16 @@ export const XPBNPLabels = {
 
 export const ModelConfig = {
   [AgentModelName.gpt_3_5_turbo]: {
-    name: 'gpt-3.5-turbo-1106',
-    // name: 'gpt-3.5-turbo-0125',
+    // name: 'gpt-3.5-turbo-1106',
+    name: 'gpt-3.5-turbo-0125',
     maxTokens: 16385,
     cost: 1,
     providerPriceByInputToken: 0.0000005,
     providerPricePriceByOutputToken: 0.0000015,
   },
   [AgentModelName.gpt_3_5_turbo_16k]: {
-    name: 'gpt-3.5-turbo-1106',
-    // name: 'gpt-3.5-turbo-0125',
+    // name: 'gpt-3.5-turbo-1106',
+    name: 'gpt-3.5-turbo-0125',
     maxTokens: 16385,
     cost: 1,
     providerPriceByInputToken: 0.0000005,
@@ -62,9 +62,12 @@ export const ModelConfig = {
 
 export const appUrl = 'https://app.chaindesk.ai';
 export const apiUrl = 'https://api.chaindesk.ai';
+// export const appUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL as string;
+// export const apiUrl = process.env.NEXT_PUBLIC_API_URL as string;
 
 export const youtubeSummaryTool = {
   sitemapPageSize: 1000,
+  paginationLimit: 100,
 };
 
 export default config;

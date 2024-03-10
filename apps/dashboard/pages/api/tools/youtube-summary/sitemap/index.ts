@@ -28,11 +28,15 @@ export default async function handler(
 
   const nbPages = Math.ceil(count / youtubeSummaryTool.sitemapPageSize);
 
-  const paths = new Array(nbPages)
-    .fill(0)
-    .map(
-      (_, index) => `${baseUrl}/api/tools/youtube-summary/sitemap/${index}.xml`
-    );
+  const paths = [
+    ...new Array(nbPages)
+      .fill(0)
+      .map(
+        (_, index) =>
+          `${baseUrl}/api/tools/youtube-summary/sitemap/${index}.xml`
+      ),
+    `${baseUrl}/api/tools/youtube-summary/sitemap/all.xml`,
+  ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
       <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"> 

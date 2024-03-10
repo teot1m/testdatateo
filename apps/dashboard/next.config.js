@@ -9,6 +9,7 @@ const pkg = require('../../package.json');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // assetPrefix: process.env.NEXT_PUBLIC_DASHBOARD_URL,
   reactStrictMode: true,
   output: 'standalone',
   publicRuntimeConfig: {
@@ -130,6 +131,10 @@ const nextConfig = {
         {
           source: '/api/tools/youtube-summary/sitemap/:index(\\d+).xml',
           destination: '/api/tools/youtube-summary/sitemap/:index',
+        },
+        {
+          source: '/api/tools/youtube-summary/sitemap/:slug(.*).xml',
+          destination: '/api/tools/youtube-summary/sitemap/:slug',
         },
         {
           source: '/blog',
@@ -258,6 +263,33 @@ const nextConfig = {
     config.plugins.push(
       new CopyWebpackPlugin({
         patterns: [
+          {
+            from: '../../packages/ui/src/**/static/**',
+            globOptions: {
+              ignore: ['**/ui/node_modules'],
+            },
+            to({ context, absoluteFilename }) {
+              // Adds compatibility for windows path
+              if (os.platform() === 'win32') {
+                const absoluteFilenameWin = absoluteFilename.replaceAll(
+                  '\\',
+                  '/'
+                );
+                const contextWin = context.replaceAll('\\', '/');
+                const appName = /ui\/src\/static\/(.*)\//.exec(
+                  absoluteFilenameWin
+                );
+                return Promise.resolve(
+                  `${contextWin}/public/static/${appName[1]}/[name][ext]`
+                );
+              }
+              const appName = /ui\/src\/static\/(.*)\//.exec(absoluteFilename);
+
+              return Promise.resolve(
+                `${context}/public/shared/${appName[1]}/[name][ext]`
+              );
+            },
+          },
           {
             from: '../../packages/integrations/**/static/**',
             globOptions: {

@@ -24,6 +24,7 @@ import {
   ConversationChannel,
   MembershipRole,
   Prisma,
+  ToolType,
 } from '@chaindesk/prisma';
 import { prisma } from '@chaindesk/prisma/client';
 
@@ -33,18 +34,6 @@ export const chatAgentRequest = async (
   req: AppNextApiRequest,
   res: NextApiResponse
 ) => {
-  console.log(
-    'Cloudflare location headers ------->',
-    JSON.stringify({
-      'cf-ipcity': req.headers['cf-ipcity'],
-      'cf-ipcountry': req.headers['cf-ipcountry'],
-      'cf-region': req.headers['cf-region'],
-      'cf-region-code': req.headers['cf-region-code'],
-      'cf-postal-code': req.headers['cf-postal-code'],
-      'cf-timezone': req.headers['cf-timezone'],
-      'cf-ipcontinent': req.headers['cf-ipcontinent'],
-    })
-  );
   const session = req.session;
   const id = req.query.id as string;
   const data = req.body as ChatRequest;
@@ -75,12 +64,19 @@ export const chatAgentRequest = async (
 
         include: {
           ...ChatAgentArgs.include?.organization.include,
-          ...(hasContact
-            ? {
-                contacts: {
-                  take: 1,
-                  where: {
-                    OR: [
+          contacts: {
+            take: 1,
+            where: {
+              OR: [
+                {
+                  conversationsV2: {
+                    some: {
+                      id: conversationId,
+                    },
+                  },
+                },
+                ...(hasContact
+                  ? [
                       ...(data?.contact?.email
                         ? [{ email: data.contact.email }]
                         : []),
@@ -90,11 +86,11 @@ export const chatAgentRequest = async (
                       ...(data?.contact?.userId
                         ? [{ externalId: data.contact.userId }]
                         : []),
-                    ],
-                  },
-                },
-              }
-            : {}),
+                    ]
+                  : []),
+              ],
+            },
+          },
           conversations: {
             ...ChatConversationArgs,
             take: 1,
@@ -187,6 +183,12 @@ export const chatAgentRequest = async (
     } catch (error) {
       console.log('error', error);
     }
+  }
+
+  if (!!existingContact || hasContact) {
+    agent.tools = agent.tools.filter(
+      (each) => each.type !== ToolType.lead_capture
+    );
   }
 
   const chatRes = await handleChatMessage({

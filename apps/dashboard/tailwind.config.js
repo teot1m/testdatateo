@@ -17,7 +17,14 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Josefin Sans"', ...defaultTheme.fontFamily.sans],
+        sans: ['"Inter"', ...defaultTheme.fontFamily.sans],
+        'bricolage-grotesque': [
+          'var(--font-bricolage-grotesque)',
+          'sans-serif',
+        ],
+        caveat: ['var(--font-caveat)', 'sans-serif'],
+        title: ['var(--font-bricolage-grotesque)', 'sans-serif'],
+        label: ['var(--font-caveat)', 'sans-serif'],
       },
       animation: {
         typewriterCursor: 'typewriterCursor 1s infinite',
