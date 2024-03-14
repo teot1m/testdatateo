@@ -26,6 +26,10 @@ import {
   SubscriptionPlan,
 } from '@chaindesk/prisma';
 import { prisma } from '@chaindesk/prisma/client';
+import getRequestLocation from '@chaindesk/lib/get-request-location';
+
+const isCrispAction = (type: string): type is Action =>
+  (Object.values(Action) as string[]).includes(type);
 
 const handler = createApiHandler();
 
@@ -116,7 +120,7 @@ type HookBodyMessageUpdated = HookBodyBase & {
 type HookBody = HookBodyBase | HookBodyMessageSent | HookBodyMessageUpdated;
 
 const getIntegration = async (websiteId: string, channelExternalId: string) => {
-  const integration = await prisma.serviceProvider.findUnique({
+  const integration = await prisma.serviceProvider.findUniqueOrThrow({
     where: {
       unique_external_id: {
         type: ServiceProviderType.crisp,
@@ -144,13 +148,16 @@ const getIntegration = async (websiteId: string, channelExternalId: string) => {
     throw new Error('Agent not found');
   }
 
-  // For now those tools implemented in the integration (legacy)
-  agent.tools = (agent.tools || []).filter(
-    (each) =>
-      !['request_human', 'mark_as_resolved', 'capture_lead'].includes(each.type)
-  );
+  const crispActions = (agent.tools || []).map((each) => {
+    if (isCrispAction(each.type)) {
+      return Action[each.type];
+    }
+  });
 
-  return integration;
+  // For now those tools implemented in the integration (legacy)
+  agent.tools = (agent.tools || []).filter((each) => !isCrispAction(each.type));
+
+  return { ...integration, crispActions };
 };
 
 // const handleSendInput = async ({
@@ -183,12 +190,19 @@ const getIntegration = async (websiteId: string, channelExternalId: string) => {
 //   });
 // };
 
-const handleQuery = async (
-  websiteId: string,
-  sessionId: string,
-  query: string,
-  t: TFunction<'translation', undefined>
-) => {
+const handleQuery = async ({
+  websiteId,
+  sessionId,
+  query,
+  t,
+  location,
+}: {
+  websiteId: string;
+  sessionId: string;
+  query: string;
+  t: TFunction<'translation', undefined>;
+  location?: ReturnType<typeof getRequestLocation>;
+}) => {
   const integration = await getIntegration(websiteId, sessionId);
   const agent = integration?.agents?.[0];
 
@@ -200,6 +214,7 @@ const handleQuery = async (
     externalVisitorId: sessionId,
     channelExternalId: sessionId,
     channelCredentialsId: integration?.id,
+    location,
   });
 
   if (chatResponse?.agentResponse) {
@@ -209,29 +224,42 @@ const handleQuery = async (
       !!agent?.includeSources ? filterInternalSources(sources || [])! : []
     )}`.trim();
 
+    const choices = [
+      ...(integration?.crispActions.includes(Action.mark_as_resolved)
+        ? [
+            {
+              value: Action.mark_as_resolved,
+              icon: '✅',
+              label: t('crisp:choices.resolve'),
+              selected: false,
+            },
+          ]
+        : []),
+      ...(integration?.crispActions.includes(Action.request_human)
+        ? [
+            {
+              value: Action.request_human,
+              icon: '💬',
+              label: t('crisp:choices.request'),
+              selected: false,
+            },
+          ]
+        : []),
+    ];
+
     await CrispClient.website.sendMessageInConversation(websiteId, sessionId, {
-      type: 'picker',
+      type: choices.length === 0 ? 'text' : 'picker',
       from: 'operator',
       origin: 'chat',
 
-      content: {
-        id: 'chaindesk-answer',
-        text: finalAnswer,
-        choices: [
-          {
-            value: Action.mark_as_resolved,
-            icon: '✅',
-            label: t('crisp:choices.resolve'),
-            selected: false,
-          },
-          {
-            value: Action.request_human,
-            icon: '💬',
-            label: t('crisp:choices.request'),
-            selected: false,
-          },
-        ],
-      },
+      content:
+        choices.length === 0
+          ? finalAnswer
+          : {
+              id: 'chaindesk-answer',
+              text: finalAnswer,
+              choices,
+            },
       user: {
         type: 'participant',
         nickname: agent?.name || 'Chaindesk',
@@ -304,6 +332,7 @@ export const hook = async (req: AppNextApiRequest, res: NextApiResponse) => {
               channel: ConversationChannel.crisp as ConversationChannel,
               organizationId: integration?.organizationId as string,
               conversationId: integration?.conversations?.[0]?.id,
+              location: getRequestLocation(req),
             });
 
             await conversationManager.createMessage({
@@ -325,12 +354,13 @@ export const hook = async (req: AppNextApiRequest, res: NextApiResponse) => {
           );
 
           try {
-            await handleQuery(
-              body.website_id,
-              body.data.session_id,
-              body.data.content,
-              t
-            );
+            await handleQuery({
+              websiteId: body.website_id,
+              sessionId: body.data.session_id,
+              query: body.data.content,
+              t,
+              location: getRequestLocation(req),
+            });
           } catch (err) {
             req.logger.error(err);
           }
@@ -338,19 +368,6 @@ export const hook = async (req: AppNextApiRequest, res: NextApiResponse) => {
 
         break;
       case 'message:received':
-        if (body.data.from === 'operator' && body.data.type === 'text') {
-          await CrispClient.website.updateConversationMetas(
-            body.website_id,
-            body.data.session_id,
-            {
-              data: {
-                ...metadata,
-                aiStatus: AIStatus.disabled,
-                aiDisabledDate: new Date(),
-              } as ConversationMetadata,
-            }
-          );
-        }
         break;
       case 'message:updated':
         req.logger.info(body.data.content?.choices);

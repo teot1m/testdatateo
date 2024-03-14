@@ -13,19 +13,21 @@ import Link from 'next/link';
 import React from 'react';
 
 import slugify from '@chaindesk/lib/slugify';
-import { SummaryPageProps } from '@chaindesk/lib/types';
+import { SummaryPageProps, WebPageSummary } from '@chaindesk/lib/types';
 
 type Props = {
   summaries: any[];
+  baseUrl: string;
+  label?: string;
 };
 
-export default function LatestVideoSummaries({ summaries }: Props) {
+export default function LatestSummaries({ summaries, baseUrl, label }: Props) {
   return (
     <>
       {(summaries.length || 0) > 0 && (
         <Stack sx={{ mt: 10, width: '100%' }} spacing={2}>
           <Typography level="h4" sx={{ textAlign: 'center' }}>
-            Latest Video Summaries
+            {label || 'Latest Summaries'}
           </Typography>
           <Stack
             flexWrap="wrap"
@@ -53,7 +55,7 @@ export default function LatestVideoSummaries({ summaries }: Props) {
                 })}
               >
                 <Link
-                  href={`/tools/youtube-summarizer/${slugify(
+                  href={`${baseUrl}/${slugify(
                     (each as SummaryPageProps)?.output?.metadata?.title
                   )}-${each.externalId}`}
                   className="w-full"
@@ -64,7 +66,8 @@ export default function LatestVideoSummaries({ summaries }: Props) {
                         <img
                           src={
                             (each as SummaryPageProps)?.output?.metadata
-                              ?.thumbnails?.high?.url
+                              ?.thumbnails?.high?.url ||
+                            (each as WebPageSummary)?.output?.metadata?.ogImage
                           }
                           alt=""
                         />
@@ -89,14 +92,14 @@ export default function LatestVideoSummaries({ summaries }: Props) {
 
           <Stack sx={{ justifyContent: 'center' }}>
             <Link
-              href="/tools/youtube-summarizer/all/0"
+              href={`${baseUrl}/all/0`}
               style={{ marginLeft: 'auto', marginRight: 'auto' }}
             >
               <Button
                 // endDecorator={<ArrowForwardRoundedIcon />}
                 variant="outlined"
               >
-                🎬 View More Summaries
+                ⭐️ View More Summaries
               </Button>
             </Link>
           </Stack>

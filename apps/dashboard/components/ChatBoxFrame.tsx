@@ -1,20 +1,27 @@
+import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import CircularProgress from '@mui/joy/CircularProgress';
+import IconButton from '@mui/joy/IconButton';
+import Stack from '@mui/joy/Stack';
 import { useColorScheme } from '@mui/joy/styles';
 import { SxProps } from '@mui/joy/styles/types';
+import Typography from '@mui/joy/Typography';
 import React, { ReactPropTypes, useEffect, useMemo } from 'react';
 
 import ChatBox from '@app/components/ChatBox';
+import useAgent from '@app/hooks/useAgent';
 import useChat, { ChatContext, CustomContact } from '@app/hooks/useChat';
 import { InitWidgetProps } from '@app/widgets/chatbox/common/types';
 
 import pickColorBasedOnBgColor from '@chaindesk/lib/pick-color-based-on-bgcolor';
+import { ChatMessage } from '@chaindesk/lib/types';
+import { LeadCaptureToolchema } from '@chaindesk/lib/types/dtos';
 import { AgentInterfaceConfig } from '@chaindesk/lib/types/models';
-import { Agent, ConversationChannel } from '@chaindesk/prisma';
+import { Agent, ConversationChannel, Tool } from '@chaindesk/prisma';
+import LeadForm from '@chaindesk/ui/LeadForm';
+import { cn } from '@chaindesk/ui/utils/cn';
 
-import CustomerSupportActions from './CustomerSupportActions';
-import Loader from './Loader';
-import NewChatButton from './NewChatButton';
+const defaultAgentIconUrl = `${process.env.NEXT_PUBLIC_DASHBOARD_URL}/images/chatbubble-default-icon-sm.gif`;
 
 const defaultChatBubbleConfig: AgentInterfaceConfig = {
   // displayName: 'Agent Smith',
@@ -30,9 +37,11 @@ const API_URL = process.env.NEXT_PUBLIC_DASHBOARD_URL;
 
 export type ChatBoxStandardProps = InitWidgetProps & {
   instanceId?: string;
+  layout?: any;
 };
 
 function ChatBoxFrame(props: ChatBoxStandardProps) {
+  const { mode } = useColorScheme();
   const [agentId, setAgentId] = React.useState<string | undefined>(
     props.agentId
   );
@@ -40,6 +49,9 @@ function ChatBoxFrame(props: ChatBoxStandardProps) {
   const [config, setConfig] = React.useState<AgentInterfaceConfig>(
     props.initConfig || defaultChatBubbleConfig
   );
+  const [hasSubmittedForm, setHasSubmittedForm] = React.useState(false);
+
+  const { query } = useAgent({ id: agentId });
 
   const methods = useChat({
     endpoint: `${API_URL}/api/agents/${agentId}/query`,
@@ -108,38 +120,66 @@ function ChatBoxFrame(props: ChatBoxStandardProps) {
     }
   }, [agentId]);
 
-  const handleFetchAgent = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/agents/${agentId}`);
-      const data = (await res.json()) as Agent;
-
-      const agentConfig = data?.interfaceConfig as AgentInterfaceConfig;
-
-      setAgent(data);
+  useEffect(() => {
+    if (query.data) {
+      setAgent(query.data);
       setConfig({
         ...defaultChatBubbleConfig,
-        ...agentConfig,
+        ...(query?.data?.interfaceConfig as AgentInterfaceConfig),
         ...props.initConfig,
       });
-
-      props?.onAgentLoaded?.(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
     }
-  };
-
-  useEffect(() => {
-    if (agentId) {
-      handleFetchAgent();
-    }
-  }, [agentId]);
+  }, [query.data]);
 
   useEffect(() => {
     if (props.initConfig) {
       setConfig(props.initConfig);
     }
   }, [props.initConfig]);
+
+  const {
+    isStreaming,
+    visitorId,
+    conversationId,
+    visitorEmail,
+    refreshConversation,
+    contact,
+  } = methods;
+  const hasCapturedLead =
+    !!visitorEmail ||
+    !!hasSubmittedForm ||
+    !!props.contact?.email ||
+    !!props.contact?.phoneNumber;
+
+  const leadToolConfig = ((agent as any)?.tools as Tool[])?.find(
+    (one) => one?.type === 'lead_capture'
+  )?.config as LeadCaptureToolchema['config'];
+
+  const injectLeadFormInInitMessags =
+    !!leadToolConfig?.isRequired && !hasCapturedLead;
+
+  const leadForm = useMemo(() => {
+    return (
+      <LeadForm
+        agentId={agentId!}
+        visitorId={visitorId}
+        conversationId={conversationId}
+        visitorEmail={visitorEmail}
+        onSubmitSucess={async (values) => {
+          refreshConversation();
+          setHasSubmittedForm(true);
+        }}
+        {...leadToolConfig}
+      />
+    );
+  }, [
+    agentId,
+    visitorId,
+    conversationId,
+    visitorEmail,
+    refreshConversation,
+    leadToolConfig,
+  ]);
 
   const initialMessages = useMemo(() => {
     let msgs = [] as string[];
@@ -149,15 +189,75 @@ function ChatBoxFrame(props: ChatBoxStandardProps) {
       msgs = config?.initialMessages || [];
     }
 
-    return msgs.map((each) => each?.trim?.()).filter((each) => !!each);
-  }, [props?.initConfig?.initialMessages, config?.initialMessages]);
+    const m = msgs
+      .map((each) => each?.trim?.())
+      .filter((each) => !!each)
+      .map(
+        (each) =>
+          ({
+            from: 'agent',
+            message: each.trim(),
+            approvals: [],
+          } as ChatMessage)
+      );
+
+    if (injectLeadFormInInitMessags) {
+      m.push({
+        id: 'lead-form',
+        from: 'agent',
+        component: leadForm,
+        disableActions: true,
+      } as ChatMessage);
+    }
+    return m;
+  }, [
+    props?.initConfig?.initialMessages,
+    config?.initialMessages,
+    injectLeadFormInInitMessags,
+
+    leadForm,
+  ]);
+
+  // const initMessages = useMemo(() => {}, [props.initConfig?.initialMessages]);
+
+  const messages = useMemo(() => {
+    const form = {
+      id: 'lead-form',
+      from: 'agent',
+      component: leadForm,
+      disableActions: true,
+    } as ChatMessage;
+
+    return history.reduce(
+      (acc, current, index) => {
+        return [
+          ...acc,
+          current,
+
+          // Show lead form after first AI answer when not required
+          ...(!!leadToolConfig &&
+          !leadToolConfig?.isRequired &&
+          !hasCapturedLead &&
+          history?.length >= 2 &&
+          index === 1 &&
+          !(history?.length === 2 && isStreaming)
+            ? [form]
+            : []),
+        ];
+      },
+      [
+        // Show lead form after first AI answer when required
+        // ...(!!leadToolConfig?.isRequired && !hasCapturedLead ? [form] : []),
+      ] as ChatMessage[]
+    );
+  }, [isStreaming, history, leadToolConfig, leadForm, hasCapturedLead]);
 
   if (!agent) {
     return (
       <Box
         sx={{
-          width: '100dvw',
-          height: '100dvh',
+          width: '100%',
+          height: '100%',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -170,67 +270,92 @@ function ChatBoxFrame(props: ChatBoxStandardProps) {
     );
   }
 
+  const Layout = props.layout || React.Fragment;
+
   return (
     <ChatContext.Provider
       value={{
         ...methods,
+        history: messages,
       }}
     >
-      <Box
-        className="chaindesk-iframe"
-        sx={(theme) => ({
-          px: 2,
-          pb: 2,
-          position: 'relative',
-          width: '100vw',
-          height: '100vh',
-          maxHeight: '100%',
-          boxSizing: 'border-box',
-          backgroundColor: config?.isBgTransparent
-            ? 'transparent'
-            : theme.palette.background.default,
-
-          '& .message-agent': {},
-          '& .message-human': {
-            backgroundColor: primaryColor,
-          },
-          '& .message-human *': {
-            color: textColor,
-          },
-          ...((props.styles ? props.styles : {}) as any),
-        })}
+      <Layout
+        {...(props.layout
+          ? {
+              className: cn(mode, props.className),
+              agentId: agentId,
+            }
+          : {})}
       >
-        <ChatBox
-          messages={history}
-          onSubmit={handleChatSubmit}
-          messageTemplates={config.messageTemplates}
-          initialMessage={config.initialMessage}
-          initialMessages={initialMessages}
-          agentIconUrl={agent?.iconUrl!}
-          isLoadingConversation={isLoadingConversation}
-          hasMoreMessages={hasMoreMessages}
-          handleLoadMoreMessages={handleLoadMoreMessages}
-          handleEvalAnswer={handleEvalAnswer}
-          handleAbort={handleAbort}
-          hideInternalSources
-          // renderBottom={<CustomerSupportActions config={config} />}
-          withFileUpload
-          withSources={!!agent?.includeSources}
-          isAiEnabled={methods.isAiEnabled}
-          disableWatermark={isPremium && !!config?.isBrandingDisabled}
-          renderAfterMessages={
-            <NewChatButton
-              sx={{
-                position: 'absolute',
-                right: 15,
-                top: 15,
-                background: 'white',
-                zIndex: 1,
-              }}
-            />
-          }
-        />
-      </Box>
+        <Box
+          className={cn({
+            [`${mode} ${props.className}`]: !props.layout,
+          })}
+          sx={(theme) => ({
+            // px: 2,
+            // pb: 2,
+            display: 'flex',
+            flex: 1,
+            flexDirection: 'column',
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+            maxHeight: '100%',
+            boxSizing: 'border-box',
+            backgroundColor: config?.isBgTransparent
+              ? 'transparent'
+              : theme.palette.background.default,
+
+            '& .message-agent': {},
+            '& .message-human': {
+              backgroundColor: primaryColor,
+            },
+            '& .message-human *': {
+              color: textColor,
+            },
+            // pt: 6,
+            // px: 2,
+            // pb: 2,
+            ...((props.styles ? props.styles : {}) as any),
+          })}
+        >
+          <ChatBox
+            messages={messages}
+            onSubmit={handleChatSubmit}
+            messageTemplates={config.messageTemplates}
+            initialMessage={config.initialMessage}
+            initialMessages={initialMessages}
+            agentIconUrl={agent?.iconUrl! || defaultAgentIconUrl}
+            agentIconStyle={props?.initConfig?.iconStyle}
+            isLoadingConversation={isLoadingConversation}
+            hasMoreMessages={hasMoreMessages}
+            handleLoadMoreMessages={handleLoadMoreMessages}
+            handleEvalAnswer={handleEvalAnswer}
+            handleAbort={handleAbort}
+            hideInternalSources
+            // renderBottom={<CustomerSupportActions config={config} />}
+            withFileUpload
+            withSources={!!agent?.includeSources}
+            isAiEnabled={methods.isAiEnabled}
+            disableWatermark={isPremium && !!config?.isBrandingDisabled}
+            // renderAfterMessages={
+            //   conversationId ? (
+            //     <NewChatButton
+            //       sx={{
+            //         position: 'absolute',
+            //         left: 0,
+            //         top: 0,
+            //         background: 'white',
+            //         zIndex: 1,
+            //       }}
+            //     />
+            //   ) : null
+            // }
+            readOnly={leadToolConfig?.isRequired && !hasCapturedLead}
+          />
+        </Box>
+      </Layout>
     </ChatContext.Provider>
   );
 }

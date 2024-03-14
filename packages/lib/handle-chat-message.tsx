@@ -24,6 +24,7 @@ import { AnalyticsEvents, capture } from './analytics-server';
 import { formatOrganizationSession, sessionOrganizationInclude } from './auth';
 import { ModelConfig } from './config';
 import ConversationManager from './conversation';
+import getRequestLocation from './get-request-location';
 import mailer from './mailer';
 import { CUSTOMER_SUPPORT_BASE } from './prompt-templates';
 
@@ -79,7 +80,7 @@ export type ChatAgentArgs = PrismaType.AgentGetPayload<typeof ChatAgentArgs>;
 
 type Props = Omit<ChatRequest, 'isDraft' | 'streaming'> & {
   logger?: Logger;
-  country?: string; // Request country origin
+  location?: ReturnType<typeof getRequestLocation>;
   userId?: string;
   agent: ChatAgentArgs;
   conversation?: ChatConversationArgs;
@@ -98,7 +99,8 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
 
   const isNewConversation = !conversation?.id;
   const history = conversation?.messages || [];
-  const channel = data.channel || ConversationChannel.dashboard;
+  const channel = (data.channel ||
+    ConversationChannel.dashboard) as ConversationChannel;
   const conversationId = conversation?.id || data.conversationId || cuid();
   const isDashboardMessage =
     channel === ConversationChannel.dashboard && !!data.userId;
@@ -137,6 +139,22 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
 
   const filteredTools = (agent?.tools || []).filter((each) => {
     if (each?.type === ToolType.lead_capture) {
+      // Disabled for the following channels
+      if (
+        [
+          ConversationChannel.api,
+          ConversationChannel.crisp,
+          ConversationChannel.website,
+          ConversationChannel.dashboard,
+        ].includes(channel as any)
+      ) {
+        return false;
+      }
+
+      if (conversation?.status === ConversationStatus.HUMAN_REQUESTED) {
+        return false;
+      }
+
       // already captured lead or contact for the conversation
       if (
         !!conversation?.lead ||
@@ -145,12 +163,17 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
         return false;
       }
     } else if (
-      conversation?.status === ConversationStatus.HUMAN_REQUESTED &&
-      (each?.type === ToolType.request_human ||
-        each?.type === ToolType.mark_as_resolved)
+      each?.type === ToolType.request_human ||
+      each?.type === ToolType.mark_as_resolved
     ) {
-      // Human has been requested
-      return false;
+      // Disabled for the following channels
+      if ([ConversationChannel.crisp].includes(channel as any)) {
+        return false;
+      }
+
+      if (conversation?.status === ConversationStatus.HUMAN_REQUESTED) {
+        return false;
+      }
     }
     return true;
   });
@@ -166,13 +189,14 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
     conversationId,
     channelExternalId: data?.channelExternalId,
     channelCredentialsId: data?.channelCredentialsId,
-    ...(!data.userId && !!isNewConversation && data.country
+    ...(!data.userId && !!isNewConversation && data?.location?.country
       ? {
           metadata: {
-            country: data.country,
+            country: data.location.country,
           },
         }
       : {}),
+    location: data.location,
   });
 
   const inputMessageId = cuid();

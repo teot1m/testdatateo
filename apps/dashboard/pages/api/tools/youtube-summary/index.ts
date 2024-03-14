@@ -50,7 +50,9 @@ export const createYoutubeSummary = async (
   req: AppNextApiRequest,
   res: NextApiResponse
 ) => {
-  const { url } = YoutubeSummarySchema.parse(req.body);
+  const { url, date } = YoutubeSummarySchema.parse(req.body);
+  const isAuthenticated =
+    req.headers['api-key'] === process.env.NEXTAUTH_SECRET;
 
   const Youtube = new YoutubeApi();
   const videoId = YoutubeApi.extractVideoId(url);
@@ -111,15 +113,17 @@ export const createYoutubeSummary = async (
       chunkSize: ModelConfig[modelName].maxTokens * 0.5,
     });
 
-    await rateLimit({
-      duration: 60,
-      limit: 2,
-    })(req, res);
-
-    if (!refresh) {
-      // Trick to bypass cloudflare 100s timeout limit
-      res.json({ processing: true });
+    if (!isAuthenticated) {
+      await rateLimit({
+        duration: 60,
+        limit: 2,
+      })(req, res);
     }
+
+    // if (!refresh) {
+    //   // Trick to bypass cloudflare 100s timeout limit
+    //   res.json({ processing: true });
+    // }
 
     const model = new ChatModel();
 
@@ -170,11 +174,11 @@ export const createYoutubeSummary = async (
       messages: [
         {
           role: 'system',
-          content: `Generate a short summary of a given youtube video transcript. Provide your response in raw markdown format`,
+          content: `Generate a short summary of a given video transcript. Format your response in markdown format to display the content in a nice and aerated way (but witout section titles)`,
         },
         {
           role: 'user',
-          content: `Video: ### ${chaptersText} ### Short summary that highlights most important informations for a TLDR section. Use bullet points: `,
+          content: `Transcript: ### ${chaptersText} ### Generate a short but useful summary that highlights most important informations (1-5 sentences).`,
         },
       ],
     });
@@ -182,14 +186,47 @@ export const createYoutubeSummary = async (
     const videoSummary =
       summaryCall?.completion?.choices?.[0]?.message?.content;
 
+    const faqCall = await model.call({
+      response_format: {
+        type: 'json_object',
+      },
+      model: ModelConfig[modelName].name,
+      messages: [
+        {
+          role: 'system',
+          content: `Generate a json array of useful questions and answers, focused on the underlying subject for a given essai.
+          <output-example>
+            {
+              "questions": [{ "q": "What is nuclear fusion?", "a": "Nuclear fusion is the process by which two light atomic nuclei combine to form a single heavier one while releasing massive amounts of energy" }]
+            }
+          <output-example>
+          `,
+        },
+        {
+          role: 'user',
+          content: `Essai: ### ${chaptersText} ### Generate a list of questions and answers focused on the underlying subject: `,
+        },
+      ],
+    });
+
+    const faqSTR = faqCall?.completion?.choices?.[0]?.message?.content;
+    let faq = [];
+
+    try {
+      faq = JSON.parse(faqSTR || '{}')?.questions || [];
+    } catch {}
+
     const id = found?.id || cuid();
 
     const payload = {
       id,
+      createdAt: date ? new Date(date) : undefined,
       externalId: videoId,
       type: 'youtube_summary',
       output: {
         metadata: {
+          author_name: metadata.author_name,
+          author_url: metadata.author_url,
           category,
           keywords,
           title: metadata.title,
@@ -204,6 +241,7 @@ export const createYoutubeSummary = async (
         en: {
           ...data,
           videoSummary,
+          faq,
         },
       },
       // usage: result?.usage as any,

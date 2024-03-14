@@ -1,5 +1,193 @@
 # Changelog
 
+<a name="0.1.277"></a>
+## 0.1.277 (2024-03-14)
+
+### Miscellaneous
+
+- 🤖 debug rss loader error [[88527ed](https://github.com/gmpetrov/databerry/commit/88527ed648b94c3197bb5c9f386452987b79e070)]
+
+
+<a name="0.1.276"></a>
+## 0.1.276 (2024-03-14)
+
+### Fixed
+
+- 🐛 sitemap [[3a07296](https://github.com/gmpetrov/databerry/commit/3a072966f5bfc66293017f44b6b187096b73e8cb)]
+
+### Miscellaneous
+
+- 🤖 add rss feeds [[b33054d](https://github.com/gmpetrov/databerry/commit/b33054dedb85177c64c4913c35fceae06fe94169)]
+
+
+<a name="0.1.275"></a>
+## 0.1.275 (2024-03-14)
+
+### Fixed
+
+- 🐛 job name [[b033198](https://github.com/gmpetrov/databerry/commit/b033198ba3af1f5de28dc6026f1f36693eb26f6e)]
+
+### Miscellaneous
+
+- 🎸 yt rss loader [[7d12b54](https://github.com/gmpetrov/databerry/commit/7d12b54885fe16f84bb7763939c78a57b9e8e301)]
+
+
+<a name="0.1.274"></a>
+## 0.1.274 (2024-03-13)
+
+### Miscellaneous
+
+- 🎸 ai news aggregator [[099246c](https://github.com/gmpetrov/databerry/commit/099246cb57ac2ddbbda6780c32af7e924b2fb46e)]
+
+
+<a name="0.1.273"></a>
+## 0.1.273 (2024-03-13)
+
+### Fixed
+
+- 🐛 yt faq ellipsis [[f09da0c](https://github.com/gmpetrov/databerry/commit/f09da0c449c575ed9f4a4bc7ffd78bde94591fa0)]
+
+
+<a name="0.1.272"></a>
+## 0.1.272 (2024-03-13)
+
+### Miscellaneous
+
+- 🎸 yt summarizer faq [[083666d](https://github.com/gmpetrov/databerry/commit/083666dc872d6be0e21049a2b6f800f8ccf6d590)]
+
+
+<a name="0.1.271"></a>
+## 0.1.271 (2024-03-13)
+
+### Fixed
+
+- 🐛 chatbot submit with macos &#x27;candidate window&#x27; enabled [[989acca](https://github.com/gmpetrov/databerry/commit/989acca87cb1e286823bf2ea0d93ac652255bc38)]
+- 🐛 seo broken when using useSearchParams [[bf19e62](https://github.com/gmpetrov/databerry/commit/bf19e622cfe1bfbe80feec36a536f33437899d25)]
+
+### Miscellaneous
+
+- 🤖 improve tracking traffic from yt tool [[3f30114](https://github.com/gmpetrov/databerry/commit/3f301143d75374ede6e02fa6a848357b1dbd8100)]
+
+
+<a name="0.1.270"></a>
+## 0.1.270 (2024-03-13)
+
+### Fixed
+
+- 🐛 formatSourceRawText should not show &#x27;Sources&#x27; if empty [[9971557](https://github.com/gmpetrov/databerry/commit/99715576bf9641e3f69fa3f5178608eea92626f1)]
+
+
+<a name="0.1.269"></a>
+## 0.1.269 (2024-03-13)
+
+### Fixed
+
+- 🐛 crisp issues [[6472942](https://github.com/gmpetrov/databerry/commit/64729427c5b39d1aee495a20baed3dcb06ca4fcc)]
+
+
+<a name="0.1.268"></a>
+## 0.1.268 (2024-03-12)
+
+### Fixed
+
+- 🐛 spacing [[5d465a4](https://github.com/gmpetrov/databerry/commit/5d465a4ef44fb74ae8d442fd5e817af40d20b009)]
+
+
+<a name="0.1.267"></a>
+## 0.1.267 (2024-03-12)
+
+### Fixed
+
+- 🐛 typo [[99e7748](https://github.com/gmpetrov/databerry/commit/99e77485df1c2c87bcf286515a350ae98b71fae7)]
+
+### Miscellaneous
+
+-  Release 0.1.266 [[1e55b7b](https://github.com/gmpetrov/databerry/commit/1e55b7b34aac0c04d82467c3d1f6abc92474d95e)]
+-  debug email webhook [[45d2f89](https://github.com/gmpetrov/databerry/commit/45d2f8995fb028bfc8180f0349fd7aa8ac8a0174)]
+
+
+<a name="0.1.265"></a>
+## 0.1.265 (2024-03-12)
+
+### Miscellaneous
+
+- 🎸 conversation location ([#344](https://github.com/gmpetrov/databerry/issues/344)) [[eca4c6f](https://github.com/gmpetrov/databerry/commit/eca4c6fb43dbd6b681dbca6cd7694cd05dd63317)]
+
+
+<a name="0.1.264"></a>
+## 0.1.264 (2024-03-11)
+
+### Fixed
+
+- 🐛 delete out of sync [[41f0b1f](https://github.com/gmpetrov/databerry/commit/41f0b1f22cd493169654c36b7452f9312be166fd)]
+- 🐛 faulty grammar reply on correct input [[2901658](https://github.com/gmpetrov/databerry/commit/29016580bb3ac9349430d418bd44f70af5c6b6b3)]
+
+### Miscellaneous
+
+- 🤖 set shopify as released [[fe30fc3](https://github.com/gmpetrov/databerry/commit/fe30fc37a4ad9d31ce125b99d3575f1649ddfeaa)]
+- 🎸 temp shopify impl ([#355](https://github.com/gmpetrov/databerry/issues/355)) [[c08a895](https://github.com/gmpetrov/databerry/commit/c08a8957ca92fe7dd676bb87fb04182b12e9f5a6)]
+
+
+<a name="0.1.263"></a>
+## 0.1.263 (2024-03-11)
+
+### Fixed
+
+- 🐛 add wordpress service provider type [[de0be6f](https://github.com/gmpetrov/databerry/commit/de0be6f957da355e4e932f235b1c71181fd02beb)]
+
+
+<a name="0.1.262"></a>
+## 0.1.262 (2024-03-11)
+
+### Fixed
+
+- 🐛 hide lead form when contact provided to widget [[bc60fe0](https://github.com/gmpetrov/databerry/commit/bc60fe0323f061b4e125fbc438b9f485125e8398)]
+
+
+<a name="0.1.261"></a>
+## 0.1.261 (2024-03-11)
+
+### Fixed
+
+- 🐛 init message width [[e2af73f](https://github.com/gmpetrov/databerry/commit/e2af73f6d4bce79082945eafe7805572822a4946)]
+
+
+<a name="0.1.260"></a>
+## 0.1.260 (2024-03-11)
+
+### Fixed
+
+- 🐛 default agent icon [[3121ad8](https://github.com/gmpetrov/databerry/commit/3121ad8a300c77d7f6acfee62c34e423323f2672)]
+- 🐛 standard widget px [[f821a56](https://github.com/gmpetrov/databerry/commit/f821a56a4250a6d5a1a9f2b8483c082bdb7d08cc)]
+
+### Miscellaneous
+
+-  bump [[fb63a82](https://github.com/gmpetrov/databerry/commit/fb63a82fc49f8d5ffd2f891329f0b692a491366c)]
+- 🎸 some animations [[c280241](https://github.com/gmpetrov/databerry/commit/c280241a8c1b09884f1c4bc5bc17b04771594ab8)]
+
+
+<a name="0.1.259"></a>
+## 0.1.259 (2024-03-11)
+
+### Fixed
+
+- 🐛 chatbubble layout [[d1c350d](https://github.com/gmpetrov/databerry/commit/d1c350d9743847747eaac6967157910c49a6f399)]
+
+### Miscellaneous
+
+-  bump [[adf9eb2](https://github.com/gmpetrov/databerry/commit/adf9eb284330b2baf7ca455b0cd1a6d790d6fdd0)]
+-  bump [[765e18c](https://github.com/gmpetrov/databerry/commit/765e18c52c2a923e310b9472212edac02a3cae91)]
+
+
+<a name="0.1.258"></a>
+## 0.1.258 (2024-03-10)
+
+### Miscellaneous
+
+- 🎸 lead generation ui form [[97084cf](https://github.com/gmpetrov/databerry/commit/97084cf284d07bc0682ceb3e9ce5fad7f26c4ed9)]
+-  fix typo [[9651855](https://github.com/gmpetrov/databerry/commit/9651855908a72e7ed87acac699f4bd9a9e896659)]
+
+
 <a name="0.1.257"></a>
 ## 0.1.257 (2024-03-07)
 

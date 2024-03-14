@@ -4,8 +4,11 @@ import type { Logger } from 'pino';
 import { ReactElement, ReactNode } from 'react';
 
 import { Schema } from '@chaindesk/lib/openai-tools/youtube-summary';
+import { Source } from '@chaindesk/lib/types/document';
 import {
+  ActionApproval,
   Agent,
+  Attachment,
   Conversation,
   LLMTaskOutput,
   Message,
@@ -135,15 +138,34 @@ export interface Metadata {
   liveBroadcastContent: string;
   category?: string;
   keywords?: string[];
+  author_name?: string;
+  author_url?: string;
 }
 
 export type SummaryPageProps = LLMTaskOutput & {
   output: {
     ['en']: Schema & {
       videoSummary?: string;
+      faq?: { q: string; a: string }[];
     };
   } & {
     metadata: Metadata;
+  };
+};
+
+export type WebPageSummaryMetadata = {
+  title: string;
+  description: string;
+  ogImage: string;
+  host: string;
+  url: string;
+};
+
+export type WebPageSummary = LLMTaskOutput & {
+  output: {
+    ['en']: SummaryPageProps['output']['en'] & {};
+  } & {
+    metadata: WebPageSummaryMetadata;
   };
 };
 
@@ -191,4 +213,26 @@ export type Product = {
   isDatasource?: boolean;
   isComingSoon?: boolean;
   keywords?: string[];
+};
+
+export type MessageEvalUnion = 'good' | 'bad';
+
+export type ChatMessage = {
+  id?: string;
+  eval?: MessageEvalUnion | null;
+  from: 'human' | 'agent';
+  message: string;
+  createdAt?: Date;
+  sources?: Source[];
+  component?: JSX.Element;
+  disableActions?: boolean;
+  step?: {
+    type: 'tool_call';
+    description?: string;
+  };
+  approvals: ActionApproval[];
+  metadata?: Record<string, any>;
+  attachments?: Attachment[];
+  iconUrl?: string;
+  fromName?: string;
 };

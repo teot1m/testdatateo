@@ -526,6 +526,12 @@ export const YoutubeSummarySchema = z.object({
       message: 'Invalid YouTube video URL',
     }
   ),
+  date: z.string().optional(),
+});
+
+export const WebPageSummarySchema = z.object({
+  url: z.string().url(),
+  date: z.string().optional(),
 });
 
 export const ChatResponse = z.object({
@@ -987,3 +993,9 @@ export type WhatsAppReceivedMessageMediaSchema = Extract<
   WhatsAppReceivedMessageSchema,
   { type: 'image' | 'audio' | 'video' | 'document' }
 >;
+
+export const LeadFormSchema = z.object({
+  email: z.string().email(),
+  phoneNumber: z.string().min(1),
+});
+export type LeadFormSchema = z.infer<typeof LeadFormSchema>;

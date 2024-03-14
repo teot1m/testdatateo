@@ -9,9 +9,10 @@ export type InitWidgetProps = {
   id?: string;
   initConfig?: AgentInterfaceConfig;
   agentId?: string;
-  contact?: CustomContact;
+  contact?: Omit<CustomContact, 'metadata'>;
   styles?: SxProps;
   context?: string;
+  className?: string;
   onMarkedAsResolved?(): any;
   onAgentLoaded?: (agent: Agent) => any;
 };

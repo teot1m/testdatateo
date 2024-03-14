@@ -4,6 +4,7 @@ import React from 'react';
 
 import { SummaryPageProps } from '@chaindesk/lib/types';
 
+import Cta from '@/components/cta';
 import PromoAlert from '@/components/promo-alert';
 import LatestVideoSummaries from '@/components/youtube-summarizer/latest-summaries';
 import YoutubeSummarizerForm from '@/components/youtube-summarizer/summarize-form';
@@ -44,9 +45,13 @@ export default async function YoutubeVideoSummarizer() {
           <YoutubeSummarizerForm />
 
           <div className="px-4">
-            <LatestVideoSummaries summaries={summaries || []} />
+            <LatestVideoSummaries
+              summaries={summaries || []}
+              baseUrl="/tools/youtube-summarizer"
+            />
           </div>
         </div>
+        <Cta />
       </section>
     </>
   );
