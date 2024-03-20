@@ -1,5 +1,85 @@
 # Changelog
 
+<a name="0.1.286"></a>
+## 0.1.286 (2024-03-19)
+
+### Fixed
+
+- 🐛 adjust rag + instructions for better performances [[e1e13fd](https://github.com/gmpetrov/databerry/commit/e1e13fdb9ae4893fcd8dd1311abe85cde4564514)]
+
+### Miscellaneous
+
+- 🤖 add more rss links [[c49c2c4](https://github.com/gmpetrov/databerry/commit/c49c2c419b5e84e2f7b265a3d528047294fecd5e)]
+- 🤖 next-auth setup for lp [[5d14610](https://github.com/gmpetrov/databerry/commit/5d1461003c849bb685537536cd2ef6a67ff775d1)]
+- 🤖 upgrade next-email [[aec9b48](https://github.com/gmpetrov/databerry/commit/aec9b481d0a4eb26d9173cd0cf2968813133d7f7)]
+
+
+<a name="0.1.285"></a>
+## 0.1.285 (2024-03-18)
+
+### Fixed
+
+- 🐛 instruciton typo [[5186366](https://github.com/gmpetrov/databerry/commit/51863669dd9675d9aa08bc2c5a9db32d951cd675)]
+
+
+<a name="0.1.284"></a>
+## 0.1.284 (2024-03-18)
+
+### Fixed
+
+- 🐛 phone imput bugs + perf [[3c7b3b1](https://github.com/gmpetrov/databerry/commit/3c7b3b14ff77ef0d756235d52c4a373a0a4d6e70)]
+
+
+<a name="0.1.283"></a>
+## 0.1.283 (2024-03-15)
+
+### Miscellaneous
+
+- 🤖 add rss feeds [[0b42c82](https://github.com/gmpetrov/databerry/commit/0b42c82ba68db3c2a89d2e3dded1d930ec107975)]
+
+
+<a name="0.1.282"></a>
+## 0.1.282 (2024-03-15)
+
+### Miscellaneous
+
+- 🤖 add more yt rss feeds [[53427df](https://github.com/gmpetrov/databerry/commit/53427dfd6bdca80fffb32da68983e11b1f1b68ef)]
+
+
+<a name="0.1.281"></a>
+## 0.1.281 (2024-03-14)
+
+### Fixed
+
+- 🐛 better resolution logo [[89f7764](https://github.com/gmpetrov/databerry/commit/89f7764bafa84ff2bf4ad927601351013e4985e4)]
+
+
+<a name="0.1.280"></a>
+## 0.1.280 (2024-03-14)
+
+### Fixed
+
+- 🐛 widget settings update real-time [[a704086](https://github.com/gmpetrov/databerry/commit/a704086d56f8d23bf7347f5227de7fda47a4823c)]
+- 🐛 validation issue [[fb20d7a](https://github.com/gmpetrov/databerry/commit/fb20d7a8ad7d86267f5d40f19d16f561607c8a49)]
+
+
+<a name="0.1.279"></a>
+## 0.1.279 (2024-03-14)
+
+### Fixed
+
+- 🐛 Agent Form Performances [[4ee0953](https://github.com/gmpetrov/databerry/commit/4ee0953d6cbebc57930f18e20ea5d8189fde49c7)]
+
+
+<a name="0.1.278"></a>
+## 0.1.278 (2024-03-14)
+
+### Fixed
+
+- 🐛 try to fix gpt-3.5 not answering in same language when kb empty [[bd58b4e](https://github.com/gmpetrov/databerry/commit/bd58b4e9dfc997b6b99b162fb2373e870d6cd30e)]
+- 🐛 redirect to seo friendly url [[6ddfa61](https://github.com/gmpetrov/databerry/commit/6ddfa6120d4eceaecbf06c88a38adaf8e611221d)]
+
+
 <a name="0.1.277"></a>
 ## 0.1.277 (2024-03-14)
 

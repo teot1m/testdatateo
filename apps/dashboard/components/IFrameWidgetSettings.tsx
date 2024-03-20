@@ -18,6 +18,7 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import html from 'react-syntax-highlighter/dist/esm/languages/hljs/htmlbars';
 import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/vs2015';
 
+import { useDeepCompareMemoize } from '@app/hooks/useDeepCompareEffect';
 import { theme, themeKeys } from '@app/utils/themes/iframe-widget';
 
 import { appUrl } from '@chaindesk/lib/config';
@@ -39,6 +40,67 @@ if (typeof window !== 'undefined') {
 type Props = {
   agentId: string;
 };
+
+function RenderWidget({ agentId, config }: { agentId: string; config: any }) {
+  const memoizedConfig = useDeepCompareMemoize(config);
+  const Memoized = React.useMemo(() => {
+    return (
+      <Frame
+        style={{
+          width: '100%',
+          height: 600,
+          border: '1px solid rgba(0, 0, 0, 0.2)',
+          borderRadius: 20,
+        }}
+      >
+        <FrameContextConsumer>
+          {({ document }) => {
+            const cache = createCache({
+              key: 'iframe',
+              container: document?.head,
+              prepend: true,
+              speedy: true,
+            });
+
+            return (
+              <WidgetThemeProvider emotionCache={cache} name="chaindesk-iframe">
+                <ReactFrameStyleFix />
+
+                <Box
+                  style={{
+                    width: '100vw',
+                    height: '100vh',
+                  }}
+                  sx={{
+                    body: {
+                      padding: 0,
+                      margin: 0,
+                    },
+                  }}
+                >
+                  <ChatBoxFrame
+                    agentId={agentId}
+                    initConfig={memoizedConfig!}
+                    layout={ChatboxNavBarLayout}
+                  />
+                </Box>
+
+                {memoizedConfig?.customCSS && (
+                  <style
+                    dangerouslySetInnerHTML={{
+                      __html: memoizedConfig?.customCSS || '',
+                    }}
+                  ></style>
+                )}
+              </WidgetThemeProvider>
+            );
+          }}
+        </FrameContextConsumer>
+      </Frame>
+    );
+  }, [agentId, memoizedConfig]);
+  return Memoized;
+}
 
 export default function BubbleWidgetSettings(props: Props) {
   const installScript = `<script type="module">
@@ -129,60 +191,10 @@ export default function BubbleWidgetSettings(props: Props) {
                         spacing={2}
                       >
                         {query?.data?.id && (
-                          <Frame
-                            style={{
-                              width: '100%',
-                              height: 600,
-                              border: '1px solid rgba(0, 0, 0, 0.2)',
-                              borderRadius: 20,
-                            }}
-                          >
-                            <FrameContextConsumer>
-                              {({ document }) => {
-                                const cache = createCache({
-                                  key: 'iframe',
-                                  container: document?.head,
-                                  prepend: true,
-                                  speedy: true,
-                                });
-
-                                return (
-                                  <WidgetThemeProvider
-                                    emotionCache={cache}
-                                    name="chaindesk-iframe"
-                                  >
-                                    <ReactFrameStyleFix />
-
-                                    <Box
-                                      style={{
-                                        width: '100vw',
-                                        height: '100vh',
-                                      }}
-                                      sx={{
-                                        body: {
-                                          padding: 0,
-                                          margin: 0,
-                                        },
-                                      }}
-                                    >
-                                      <ChatBoxFrame
-                                        initConfig={config!}
-                                        layout={ChatboxNavBarLayout}
-                                      />
-                                    </Box>
-
-                                    {config?.customCSS && (
-                                      <style
-                                        dangerouslySetInnerHTML={{
-                                          __html: config?.customCSS || '',
-                                        }}
-                                      ></style>
-                                    )}
-                                  </WidgetThemeProvider>
-                                );
-                              }}
-                            </FrameContextConsumer>
-                          </Frame>
+                          <RenderWidget
+                            agentId={query?.data?.id}
+                            config={config}
+                          />
                         )}
 
                         <CustomCSSInput />
