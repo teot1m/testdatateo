@@ -1,5 +1,453 @@
 # Changelog
 
+<a name="0.1.336"></a>
+## 0.1.336 (2024-04-13)
+
+### Miscellaneous
+
+- 🤖 update yt tool [[35acadf](https://github.com/gmpetrov/databerry/commit/35acadfafbcf73059926b74518504e86f2ce1e26)]
+
+
+<a name="0.1.335"></a>
+## 0.1.335 (2024-04-12)
+
+### Fixed
+
+- 🐛 zIndex button [[eaccbfc](https://github.com/gmpetrov/databerry/commit/eaccbfcffe1a9c94327d1817af20d784aa23d86f)]
+
+
+<a name="0.1.334"></a>
+## 0.1.334 (2024-04-12)
+
+### Fixed
+
+- 🐛 zIndex Select on chat-bubble [[e05968e](https://github.com/gmpetrov/databerry/commit/e05968ea8441119cb45b12eef614f686f1f30eaf)]
+
+### Miscellaneous
+
+-  bump [[9b82e51](https://github.com/gmpetrov/databerry/commit/9b82e51941976dde099195504a1387ec2d3f45b3)]
+- 🤖 upgrade to next@4.2 [[1c17ccb](https://github.com/gmpetrov/databerry/commit/1c17ccb97294f809e64b197a1358e904fb90c907)]
+- 🎸 add model mixtral-8x22b [[f5df18a](https://github.com/gmpetrov/databerry/commit/f5df18a81fee2f7b023629d8fab0d3cae4011f60)]
+
+
+<a name="0.1.333"></a>
+## 0.1.333 (2024-04-11)
+
+### Fixed
+
+- 🐛 enforce answer in same language [[44c3900](https://github.com/gmpetrov/databerry/commit/44c390037aa9ccd64ee567f94856a1cf78397fa1)]
+
+### Miscellaneous
+
+- 🤖 reorder datasource options [[2e9fab1](https://github.com/gmpetrov/databerry/commit/2e9fab15fcd0374e165bbbf45c525536bdcd6470)]
+
+
+<a name="0.1.332"></a>
+## 0.1.332 (2024-04-11)
+
+### Fixed
+
+- 🐛 RAG missing chunk with highest similarity score [[a477814](https://github.com/gmpetrov/databerry/commit/a477814b4a6692cf61afc6845692e7d8ab917903)]
+
+
+<a name="0.1.331"></a>
+## 0.1.331 (2024-04-11)
+
+### Fixed
+
+- 🐛 remove forceSubmit() + default country code as &lt;Select/&gt; [[48c31d2](https://github.com/gmpetrov/databerry/commit/48c31d2ec3693fb8a3408aa50787aec4c774b46a)]
+
+### Miscellaneous
+
+- 🎸 form improvements [[266bd26](https://github.com/gmpetrov/databerry/commit/266bd26eb5bde2998fb1c46f9372486255639ba6)]
+
+
+<a name="0.1.330"></a>
+## 0.1.330 (2024-04-10)
+
+### Fixed
+
+- 🐛 broken build [[4edabf4](https://github.com/gmpetrov/databerry/commit/4edabf4655bbe5b53d0150a602c7f900db0c19bb)]
+
+### Miscellaneous
+
+-  Release 0.1.329 [[28e7241](https://github.com/gmpetrov/databerry/commit/28e7241323e14d789df7d67e54fa07eac6fee784)]
+- 🎸 improve code support in markdown [[9b1ff90](https://github.com/gmpetrov/databerry/commit/9b1ff9007e8e79289c2c74cca75ee53f5fc74093)]
+
+
+<a name="0.1.328"></a>
+## 0.1.328 (2024-04-10)
+
+### Miscellaneous
+
+- 🎸 add openrouter headers for ranking [[76f3141](https://github.com/gmpetrov/databerry/commit/76f314167f5c14e7428c0f27533cbe34d2b5d4df)]
+
+
+<a name="0.1.327"></a>
+## 0.1.327 (2024-04-10)
+
+### Miscellaneous
+
+- 🎸 add support for anthropic opus + sonnet [[63b27cb](https://github.com/gmpetrov/databerry/commit/63b27cb5d39d13634bd27bd7afadcfdfe2108e8b)]
+
+
+<a name="0.1.326"></a>
+## 0.1.326 (2024-04-10)
+
+### Fixed
+
+- 🐛 wrong hex color prevent agent form updates [[a1ad8c8](https://github.com/gmpetrov/databerry/commit/a1ad8c87d94ef4b928472f7c066d709da3c22e0c)]
+
+
+<a name="0.1.325"></a>
+## 0.1.325 (2024-04-09)
+
+### Fixed
+
+- 🐛 form editor not showing end screen [[135db92](https://github.com/gmpetrov/databerry/commit/135db92c13e7a5d89d50139d6ca10d8670a05692)]
+
+
+<a name="0.1.324"></a>
+## 0.1.324 (2024-04-09)
+
+### Miscellaneous
+
+-  typos [[8473c11](https://github.com/gmpetrov/databerry/commit/8473c114ea90579aaea1ce796fe3da253ed2d33a)]
+- 🎸 telegram integration ([#353](https://github.com/gmpetrov/databerry/issues/353)) [[fbe84cc](https://github.com/gmpetrov/databerry/commit/fbe84ccfce1afb4c1bb91357bd1e5241c0ef8315)]
+
+
+<a name="0.1.323"></a>
+## 0.1.323 (2024-04-08)
+
+### Fixed
+
+- ✏️ migrate docs wip [[1afbdfd](https://github.com/gmpetrov/databerry/commit/1afbdfd1887e9259314b95d9d398ab936065d12e)]
+
+
+<a name="0.1.322"></a>
+## 0.1.322 (2024-04-08)
+
+### Fixed
+
+- 🐛 embeds css issue [[c9cfb35](https://github.com/gmpetrov/databerry/commit/c9cfb351a6688851ac6e3ef9a79f75696923859e)]
+
+
+<a name="0.1.321"></a>
+## 0.1.321 (2024-04-08)
+
+### Fixed
+
+- 🐛 dashboard width on safari [[bb81249](https://github.com/gmpetrov/databerry/commit/bb81249a5829dca4b5922e259058416e989fe546)]
+
+
+<a name="0.1.320"></a>
+## 0.1.320 (2024-04-08)
+
+### Fixed
+
+- 🐛 transparent background for widgets [[a1a7c09](https://github.com/gmpetrov/databerry/commit/a1a7c0955a0a4142323fcce4fde3f16436d42247)]
+- ✏️ init reference section [[943b4a2](https://github.com/gmpetrov/databerry/commit/943b4a22c2fa5ed1cfb821e86a4381608c341982)]
+
+
+<a name="0.1.319"></a>
+## 0.1.319 (2024-04-08)
+
+### Fixed
+
+- 🐛 disable @tailwindcss/forms [[ac4e36d](https://github.com/gmpetrov/databerry/commit/ac4e36d397f911607a3e866424ba4617739c923a)]
+
+### Miscellaneous
+
+-  bump [[296a321](https://github.com/gmpetrov/databerry/commit/296a321e6671173af98113abdc587a1d5f104723)]
+
+
+<a name="0.1.317"></a>
+## 0.1.317 (2024-04-08)
+
+### Fixed
+
+- ✏️ improve documentation [[dc38590](https://github.com/gmpetrov/databerry/commit/dc3859013af902f29565852326c4e595ef764161)]
+
+### Miscellaneous
+
+- 🤖 move docs to monorepo [[132c7bb](https://github.com/gmpetrov/databerry/commit/132c7bb40fe2974de27a06abc675e81ddb59ae5e)]
+- 🤖 refacto widget folder + tailwind config package [[775165a](https://github.com/gmpetrov/databerry/commit/775165a0dd25a0d021fee5e1fd3e6377aef05dfc)]
+- 🎸 Form lifecycle events [[cba69fe](https://github.com/gmpetrov/databerry/commit/cba69fe7728d4d25556e5227a69e6627f14f17b4)]
+
+
+<a name="0.1.316"></a>
+## 0.1.316 (2024-04-07)
+
+### Fixed
+
+- 🐛 patch yt summary tool transcriptBodyRenderer error [[24a7b8f](https://github.com/gmpetrov/databerry/commit/24a7b8f69c196a4c9358143ea18b11e5c0dfd8f2)]
+
+
+<a name="0.1.315"></a>
+## 0.1.315 (2024-04-07)
+
+### Fixed
+
+- 🐛 chat message overflow [[aef0422](https://github.com/gmpetrov/databerry/commit/aef0422a9328f50fee65a47fd6efcf6b0847053d)]
+
+### Miscellaneous
+
+-  bump version [[3036f81](https://github.com/gmpetrov/databerry/commit/3036f81d0534982b0f17161499bb03fec8974565)]
+
+
+<a name="0.1.314"></a>
+## 0.1.314 (2024-04-07)
+
+### Miscellaneous
+
+- 🎸 Form web component + install tab [[5774ee1](https://github.com/gmpetrov/databerry/commit/5774ee1f96d3f5f5b04cd44b456159bf9ce25a68)]
+
+
+<a name="0.1.313"></a>
+## 0.1.313 (2024-04-07)
+
+### Miscellaneous
+
+- 🎸 display chat message creation date [[1820d06](https://github.com/gmpetrov/databerry/commit/1820d06e4c2f6e68131e1c7a9603967a6053c1a6)]
+
+
+<a name="0.1.312"></a>
+## 0.1.312 (2024-04-07)
+
+### Fixed
+
+- 🐛 agent without tool error [[d5a10fa](https://github.com/gmpetrov/databerry/commit/d5a10fa5cb88abc786636bf49fcf076ad274aa56)]
+
+### Miscellaneous
+
+- 🎸 better form inbox integration [[4be753e](https://github.com/gmpetrov/databerry/commit/4be753e29332a6675a1518137c8fbc319b961388)]
+
+
+<a name="0.1.311"></a>
+## 0.1.311 (2024-04-06)
+
+### Fixed
+
+- 🐛 form tool show after n messages [[7a320f1](https://github.com/gmpetrov/databerry/commit/7a320f1ad3726c2fd12d5cbafca769e5eead5db6)]
+
+
+<a name="0.1.310"></a>
+## 0.1.310 (2024-04-06)
+
+### Miscellaneous
+
+- 🎸 programmatically open/close chatbubble widget [[c07c881](https://github.com/gmpetrov/databerry/commit/c07c8811b5de7002fa42915e2573b75bebdb4e5f)]
+
+
+<a name="0.1.309"></a>
+## 0.1.309 (2024-04-06)
+
+### Fixed
+
+- 🐛 disable dark mode toggle standard widget [[0a2754f](https://github.com/gmpetrov/databerry/commit/0a2754f914f0525e7967b879216e8d82010b1d50)]
+
+
+<a name="0.1.308"></a>
+## 0.1.308 (2024-04-06)
+
+### Fixed
+
+- 🐛 wrong template field type [[5d546f6](https://github.com/gmpetrov/databerry/commit/5d546f62ba82f62c58ebda07bc1e6878e170363f)]
+
+### Miscellaneous
+
+- 🤖 comment dashboard bubble context [[f7d4d03](https://github.com/gmpetrov/databerry/commit/f7d4d0330c7921f425480f4c2cc65499cb24ea0b)]
+- 🎸 add skeleton [[bb1dcd3](https://github.com/gmpetrov/databerry/commit/bb1dcd3fa685dbcff6ddaeded236074a0f38f1a9)]
+-  Release 0.1.307 [[77668d1](https://github.com/gmpetrov/databerry/commit/77668d1bba69bcf6641d24757f8b3343fc884c5f)]
+
+
+<a name="0.1.306"></a>
+## 0.1.306 (2024-04-06)
+
+### Fixed
+
+- 🐛 form width in editor [[9daf3f2](https://github.com/gmpetrov/databerry/commit/9daf3f2715fc27561785431e5d38c98c21b59f87)]
+
+
+<a name="0.1.305"></a>
+## 0.1.305 (2024-04-06)
+
+### Fixed
+
+- 🐛 better error message [[202884c](https://github.com/gmpetrov/databerry/commit/202884c604429f10fd25178b24b69c88c46a7608)]
+- 🐛 agent icon url [[9712ec2](https://github.com/gmpetrov/databerry/commit/9712ec21c95008eb1bb748745f66d6634cedf582)]
+
+
+<a name="0.1.304"></a>
+## 0.1.304 (2024-04-06)
+
+### Fixed
+
+- 🐛 form crash input without control [[7ea2275](https://github.com/gmpetrov/databerry/commit/7ea22759872da2c804eb0ba5a493d81dfda2f68b)]
+
+
+<a name="0.1.303"></a>
+## 0.1.303 (2024-04-06)
+
+### Miscellaneous
+
+- 🤖 fix bubble icon [[98f8e78](https://github.com/gmpetrov/databerry/commit/98f8e78af3ab59dcc4464d21ffa893e269e1b5f7)]
+
+
+<a name="0.1.302"></a>
+## 0.1.302 (2024-04-06)
+
+### Fixed
+
+- 🐛 typos [[63c627d](https://github.com/gmpetrov/databerry/commit/63c627d291a6a17fb6a2b71dfffc9b75b66182fa)]
+
+### Miscellaneous
+
+- 🎸 form templates + improve number input validation [[56ec038](https://github.com/gmpetrov/databerry/commit/56ec038574454c20f0de7c21a7208178a8a40a1b)]
+- 🎸 theming fix + improve structure ([#370](https://github.com/gmpetrov/databerry/issues/370)) [[6e66ddf](https://github.com/gmpetrov/databerry/commit/6e66ddf08a87970ba30ae4f2857d279d58a8665b)]
+
+
+<a name="0.1.301"></a>
+## 0.1.301 (2024-04-05)
+
+### Fixed
+
+- 🐛 metadata streaming [[aace82f](https://github.com/gmpetrov/databerry/commit/aace82fbea403c437f862d856f8a32b78c08c45b)]
+
+
+<a name="0.1.300"></a>
+## 0.1.300 (2024-04-05)
+
+### Fixed
+
+- 🐛 tailwind styles missing on form widget [[7bcddaf](https://github.com/gmpetrov/databerry/commit/7bcddafa7cde50ee7295f97a5d2c872d86cc8c0f)]
+
+
+<a name="0.1.299"></a>
+## 0.1.299 (2024-04-05)
+
+### Fixed
+
+- 🐛 widget should not use next deps [[b7a2230](https://github.com/gmpetrov/databerry/commit/b7a22306b97463209a3c5fa6659fe712686d2757)]
+
+
+<a name="0.1.298"></a>
+## 0.1.298 (2024-04-05)
+
+### Miscellaneous
+
+-  new form builder ([#362](https://github.com/gmpetrov/databerry/issues/362)) [[94d31ce](https://github.com/gmpetrov/databerry/commit/94d31ce93be952ca388d5f4718876eb69274b988)]
+
+
+<a name="0.1.297"></a>
+## 0.1.297 (2024-04-01)
+
+### Miscellaneous
+
+- 🤖 enable experimental models [[c7498bb](https://github.com/gmpetrov/databerry/commit/c7498bbc172d4ed6060419d1c281f0d69b41189f)]
+
+
+<a name="0.1.296"></a>
+## 0.1.296 (2024-04-01)
+
+### Fixed
+
+- 🐛 finetune rag [[56d2d5b](https://github.com/gmpetrov/databerry/commit/56d2d5b26def8baca0e6337d3b6d18c05369c9c8)]
+
+
+<a name="0.1.295"></a>
+## 0.1.295 (2024-03-31)
+
+### Fixed
+
+- 🐛 remove rag logic if no datastore tool [[c4f7600](https://github.com/gmpetrov/databerry/commit/c4f760068f19946446cc10e03d7975ce832db3d6)]
+
+
+<a name="0.1.294"></a>
+## 0.1.294 (2024-03-31)
+
+### Miscellaneous
+
+- 🤖 update prompt [[f5fa61e](https://github.com/gmpetrov/databerry/commit/f5fa61eb014eb018b9b3e18ffc32538dcacc0e3b)]
+
+
+<a name="0.1.293"></a>
+## 0.1.293 (2024-03-31)
+
+### Fixed
+
+- 🐛 knowledge restriction trick [[f64b459](https://github.com/gmpetrov/databerry/commit/f64b459b174b131ff4ed7b482f0925995e5391bc)]
+
+### Miscellaneous
+
+-  pricing [[3cbd834](https://github.com/gmpetrov/databerry/commit/3cbd834c5168fde9be53f857f9ac70225f6d2b87)]
+
+
+<a name="0.1.292"></a>
+## 0.1.292 (2024-03-31)
+
+### Fixed
+
+- 🐛 rollback [[dc7f213](https://github.com/gmpetrov/databerry/commit/dc7f2135eaaacf4d61b2483840c12e011a64ea37)]
+
+### Miscellaneous
+
+-  clean [[a5c210c](https://github.com/gmpetrov/databerry/commit/a5c210c27d71452472238a41e976194f0b0ea7bb)]
+
+
+<a name="0.1.291"></a>
+## 0.1.291 (2024-03-31)
+
+### Fixed
+
+- 🐛 improve rag based completion performance [[84cb8e5](https://github.com/gmpetrov/databerry/commit/84cb8e5951a51aaf24852cd96b14be029649189b)]
+- 🐛 topK [[126a9e9](https://github.com/gmpetrov/databerry/commit/126a9e960b3f95ed6a4d44fcd595da8409748fac)]
+- 🐛 migrate api/browser to lp to run on lambda [[054e7ed](https://github.com/gmpetrov/databerry/commit/054e7ed1424db9ef239edaad55c29ea8dc61ac0d)]
+
+
+<a name="0.1.290"></a>
+## 0.1.290 (2024-03-28)
+
+### Fixed
+
+- 🐛 browser api down [[af79c20](https://github.com/gmpetrov/databerry/commit/af79c20b2767d1fe21633eb117819e7695e834b5)]
+
+
+<a name="0.1.289"></a>
+## 0.1.289 (2024-03-27)
+
+### Miscellaneous
+
+- 🎸 openrouter support [[a2bb07b](https://github.com/gmpetrov/databerry/commit/a2bb07b20bfcc84eb5761c4bae629b1a29957093)]
+
+
+<a name="0.1.288"></a>
+## 0.1.288 (2024-03-27)
+
+### Fixed
+
+- 🐛 Force disable markdown output for unsupported channels [[1edac27](https://github.com/gmpetrov/databerry/commit/1edac27c89c31ebb25960a5ad0ba322e22c77dd5)]
+- 🐛 lower similarity score threshold [[483cc7d](https://github.com/gmpetrov/databerry/commit/483cc7d9ced595c1b43f0d2f9be26df0884b5564)]
+
+### Miscellaneous
+
+- 🤖 update pricing [[a63f661](https://github.com/gmpetrov/databerry/commit/a63f661a2e90a5dc3f72613e528e99b791301465)]
+
+
+<a name="0.1.287"></a>
+## 0.1.287 (2024-03-26)
+
+### Fixed
+
+- 🐛 crisp human out of sync [[88a0745](https://github.com/gmpetrov/databerry/commit/88a074551f46b51cf40b18e6bc83e7697e872a28)]
+- 🐛 lower similarity score treshold [[ef3dea7](https://github.com/gmpetrov/databerry/commit/ef3dea7ef00faf4fadc69c00832e4e33071499f9)]
+- 🐛 custom css not applying on standard web compononent [[18e003b](https://github.com/gmpetrov/databerry/commit/18e003bc27c23025e318e34c6b30104b2096b37e)]
+
+### Miscellaneous
+
+-  bump [[5e42be6](https://github.com/gmpetrov/databerry/commit/5e42be6c1d2211ab3572b76996e360c95c731c49)]
+
+
 <a name="0.1.286"></a>
 ## 0.1.286 (2024-03-19)
 

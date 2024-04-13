@@ -2,10 +2,10 @@ import Avatar from '@mui/joy/Avatar';
 import Box from '@mui/joy/Box';
 import Chip from '@mui/joy/Chip';
 import Stack from '@mui/joy/Stack';
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
+import dayjs from '@chaindesk/lib/date';
 import SchoolTwoToneIcon from '@mui/icons-material/SchoolTwoTone';
 import filterInternalSources from '@chaindesk/lib/filter-internal-sources';
-
 import ChatMessageApproval from './ChatMessageApproval';
 import ChatMessageAttachment from './ChatMessageAttachment';
 import CopyButton from '@chaindesk/ui/CopyButton';
@@ -69,7 +69,7 @@ function ChatMessageComponent({
         ></Avatar>
         {/* )} */}
 
-        <Stack gap={1} sx={{ overflow: 'visible' }}>
+        <Stack gap={1} sx={{ maxWidth: '100%', overflow: 'hidden' }}>
           {message?.step?.type === 'tool_call' && (
             <Chip
               size="md"
@@ -134,12 +134,16 @@ function ChatMessageComponent({
               ))}
             </Stack>
           )}
+
           {(message?.message || message?.component) && (
             <Stack gap={0.7}>
               <ChatMessageCard
                 className={cn(
                   message?.from === 'agent' ? 'message-agent' : 'message-human'
                 )}
+                sx={{
+                  mr: 'auto',
+                }}
               >
                 {/* {message?.step?.type === 'tool_call' && (
 
@@ -187,11 +191,23 @@ function ChatMessageComponent({
                   </Stack>
                 )}
               </ChatMessageCard>
-              {message?.fromName && (
-                <Typography level="body-xs" sx={{ opacity: '0.8', pl: 1 }}>
-                  {message?.fromName}
-                </Typography>
-              )}
+              <Stack>
+                <Stack gap={1} direction="row">
+                  {message?.fromName && (
+                    <Typography level="body-xs" sx={{ opacity: '0.8', pl: 1 }}>
+                      {message?.fromName}
+                    </Typography>
+                  )}
+                  {message?.createdAt && (
+                    <Typography
+                      level="body-xs"
+                      sx={{ opacity: '0.8', fontStyle: 'italic' }}
+                    >
+                      {`${dayjs((message as any)?.createdAt).fromNow()}`}
+                    </Typography>
+                  )}
+                </Stack>
+              </Stack>
             </Stack>
           )}
 

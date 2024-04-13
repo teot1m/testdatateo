@@ -21,17 +21,18 @@ import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import html from 'react-syntax-highlighter/dist/esm/languages/hljs/htmlbars';
 import docco from 'react-syntax-highlighter/dist/esm/styles/hljs/vs2015';
 
-import { useDeepCompareMemoize } from '@app/hooks/useDeepCompareEffect';
-
 import { CreateAgentSchema } from '@chaindesk/lib/types/dtos';
+import ChatBoxLoader from '@chaindesk/ui/ChatBoxLoader';
+import ChatBubble from '@chaindesk/ui/embeds/chat-bubble';
+import { useDeepCompareMemoize } from '@chaindesk/ui/hooks/useDeepCompareEffect';
+import Markdown from '@chaindesk/ui/Markdown';
+import WidgetThemeProvider from '@chaindesk/ui/themes/embeds-provider';
 
 import CommonInterfaceInput from './AgentInputs/CommonInterfaceInput';
 import CustomCSSInput from './AgentInputs/CustomCSSInput';
 import AgentForm from './AgentForm';
-import ChatBubble from './ChatBubble';
 import ConnectForm from './ConnectForm';
 import ReactFrameStyleFix from './ReactFrameStyleFix';
-import WidgetThemeProvider from './WidgetThemeProvider';
 
 if (typeof window !== 'undefined') {
   SyntaxHighlighter.registerLanguage('htmlbars', html);
@@ -63,7 +64,10 @@ function RenderWidget({ agentId, config }: any) {
             });
 
             return (
-              <WidgetThemeProvider emotionCache={cache} name="chaindesk-bubble">
+              <WidgetThemeProvider
+                emotionCache={cache}
+                prefix="chaindesk-bubble"
+              >
                 <ReactFrameStyleFix />
 
                 <Box
@@ -75,7 +79,12 @@ function RenderWidget({ agentId, config }: any) {
                     p: 2,
                   }}
                 >
-                  <ChatBubble agentId={agentId} initConfig={memoizedConfig} />
+                  <ChatBoxLoader
+                    // eslint-disable-next-line
+                    children={ChatBubble}
+                    agentId={agentId}
+                    initConfig={memoizedConfig}
+                  />
 
                   {memoizedConfig?.customCSS && (
                     <style
@@ -100,7 +109,7 @@ export default function BubbleWidgetSettings(props: Props) {
   const installScript = `<script type="module">
   import Chatbox from 'https://cdn.jsdelivr.net/npm/@chaindesk/embeds@latest/dist/chatbox/index.js';
 
-  Chatbox.initBubble({
+  const widget = await Chatbox.initBubble({
     agentId: '${props.agentId}',
     
     // optional 
@@ -122,6 +131,15 @@ export default function BubbleWidgetSettings(props: Props) {
     // Provided context will be appended to the Agent system prompt
     context: "The user you are talking to is John. Start by Greeting him by his name.",
   });
+
+  // open the chat bubble
+  widget.open();
+
+  // close the chat bubble
+  widget.close()
+
+  // or 
+  widget.toggle()
 </script>`;
 
   return (
@@ -232,15 +250,7 @@ export default function BubbleWidgetSettings(props: Props) {
                           });
                         }}
                       >
-                        <SyntaxHighlighter
-                          language="htmlbars"
-                          style={docco}
-                          customStyle={{
-                            borderRadius: 10,
-                          }}
-                        >
-                          {installScript}
-                        </SyntaxHighlighter>
+                        <Markdown>{`~~~html\n${installScript}\n`}</Markdown>
                       </Box>
                     </Stack>
                   </Stack>

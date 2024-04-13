@@ -52,17 +52,12 @@ import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
 import useSWRMutation from 'swr/mutation';
 
-import ChatBox from '@app/components/ChatBox';
 import { ConversationExport } from '@app/components/ConversationExport';
-import CopyButton from '@app/components/CopyButton';
 import DraftReplyInput from '@app/components/DarftReplyInput';
 import ImproveAnswerModal from '@app/components/ImproveAnswerModal';
 import InboxConversationSettings from '@app/components/InboxConversationSettings';
 import Layout from '@app/components/Layout';
 import { updateConversationStatus } from '@app/components/ResolveButton';
-import { handleEvalAnswer } from '@app/hooks/useChat';
-import useFileUpload from '@app/hooks/useFileUpload';
-import useStateReducer from '@app/hooks/useStateReducer';
 
 // import { client as crispClient } from '@chaindesk/lib/crisp';
 import relativeDate from '@chaindesk/lib/relative-date';
@@ -85,6 +80,10 @@ import {
   MessageFrom,
   Prisma,
 } from '@chaindesk/prisma';
+import ChatBox from '@chaindesk/ui/Chatbox';
+import { handleEvalAnswer } from '@chaindesk/ui/hooks/useChat';
+import useFileUpload from '@chaindesk/ui/hooks/useFileUpload';
+import useStateReducer from '@chaindesk/ui/hooks/useStateReducer';
 
 import { getAgents } from '../api/agents';
 import { updateStatus } from '../api/conversations/update-status';
@@ -743,6 +742,13 @@ export default function LogsPage() {
             >
               {ConversationChannel.whatsapp}
             </Option>
+            <Option
+              key={ConversationChannel.telegram}
+              value={ConversationChannel.telegram}
+              sx={{ fontSize: 14 }}
+            >
+              {ConversationChannel.telegram}
+            </Option>
 
             <Option
               key={ConversationChannel.api}
@@ -928,15 +934,6 @@ export default function LogsPage() {
                           borderRadius: 0,
                         },
 
-                        // backgroundColor: {
-                        //   [ConversationStatus.RESOLVED]:
-                        //     theme.palette.success.softActiveBg,
-                        //   [ConversationStatus.UNRESOLVED]:
-                        //     theme.palette.danger.softActiveBg,
-                        //   [ConversationStatus.HUMAN_REQUESTED]:
-                        //     theme.palette.warning.softActiveBg,
-                        // }[each?.status] as ColorPaletteProp,
-
                         ...(state.currentConversationId === each.id && {
                           backgroundColor: theme.palette.action.hover,
                         }),
@@ -1068,7 +1065,13 @@ export default function LogsPage() {
                               level="body-sm"
                               className="pr-4 line-clamp-2"
                             >
-                              {each?.messages?.[0]?.text}
+                              {/* last human message */}
+                              {each?.messages?.[each?.messages.length - 1]
+                                ?.from === 'human'
+                                ? each?.messages?.[each?.messages.length - 1]
+                                    ?.text
+                                : each?.messages?.[each?.messages.length - 2]
+                                    ?.text}
                             </Typography>
                           </Stack>
                           <Stack
@@ -1166,25 +1169,6 @@ export default function LogsPage() {
                   startDecorator={<Notifications />}
                   endDecorator={
                     <Stack direction="row" spacing={1}>
-                      {/* {!isHumanHandoffButtonHidden && (
-                        <Button
-                          variant="solid"
-                          color={state.isAiEnabled ? 'primary' : 'warning'}
-                          size="md"
-                          loading={conversationUpdater.isMutating}
-                          endDecorator={
-                            state.isAiEnabled ? (
-                              <CommentRoundedIcon fontSize="sm" />
-                            ) : (
-                              <SmartToyIcon fontSize="sm" />
-                            )
-                          }
-                          onClick={toggleAi}
-                        >
-                          {state.isAiEnabled ? 'Reply' : 'Re-Enable AI'}
-                        </Button>
-                      )} */}
-
                       <BannerActions
                         status={getConversationQuery?.data?.status}
                         email={getConversationQuery?.data?.lead?.email!}
@@ -1222,6 +1206,7 @@ export default function LogsPage() {
                     approvals: each.approvals || [],
                     sources: (each.sources as any) || [],
                     attachments: each.attachments || [],
+                    submission: each.submission!,
                     iconUrl: (each?.from === 'human'
                       ? each?.user?.customPicture || each?.user?.picture
                       : each?.agent?.iconUrl) as string,
@@ -1267,6 +1252,7 @@ export default function LogsPage() {
                     }}
                   />
                 }
+                fromInbox
               />
 
               <Divider orientation="vertical" />

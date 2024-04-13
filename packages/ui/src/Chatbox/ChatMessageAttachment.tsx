@@ -5,12 +5,13 @@ import Stack from '@mui/joy/Stack';
 import Typography from '@mui/joy/Typography';
 import React from 'react';
 
+import { Prettify } from '@chaindesk/lib/type-utilites';
 import type { Attachment } from '@chaindesk/prisma';
 
 import { ImageZoom } from '@chaindesk/ui/ImageZoom';
 
 type Props = {
-  attachment: Attachment;
+  attachment: Prettify<Omit<Attachment, 'messageId' | 'id'>>;
 };
 
 function download(url: string, filename: string) {
@@ -22,7 +23,10 @@ function download(url: string, filename: string) {
       link.download = filename;
       link.click();
     })
-    .catch(console.error);
+    .catch((e) => {
+      console.error(e);
+      window.open(url, '_blank');
+    });
 }
 
 function ChatMessageAttachment({ attachment }: Props) {

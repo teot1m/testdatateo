@@ -22,7 +22,7 @@ import { ChatRequest } from './types/dtos';
 import AgentManager from './agent';
 import { AnalyticsEvents, capture } from './analytics-server';
 import { formatOrganizationSession, sessionOrganizationInclude } from './auth';
-import { ModelConfig } from './config';
+import { channelConfig, ModelConfig } from './config';
 import ConversationManager from './conversation';
 import getRequestLocation from './get-request-location';
 import mailer from './mailer';
@@ -178,6 +178,11 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
     return true;
   });
 
+  // Disable markdown output for unsupported channels
+  if (channelConfig[channel]?.isMarkdownCompatible === false) {
+    agent.useMarkdown = false;
+  }
+
   agent.tools = filteredTools;
 
   const manager = new AgentManager({ agent, topK: 50 });
@@ -273,11 +278,11 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
 
     throw err;
   }
-
   const [chatRes] = await Promise.all([
     manager.query({
       ...data,
       conversationId,
+      channel,
       input: data.query,
       stream: data.streaming ? data.handleStream : undefined,
       history: history,
@@ -298,7 +303,7 @@ async function handleChatMessage({ agent, conversation, ...data }: Props) {
     }),
   ]);
 
-  const answerMsgId = cuid();
+  const answerMsgId = chatRes.messageId || cuid();
 
   if (!data.isDraft) {
     await conversationManager.createMessage({

@@ -12,11 +12,11 @@ import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 
-import useAgent from '@app/hooks/useAgent';
 import useModal from '@app/hooks/useModal';
-import useStateReducer from '@app/hooks/useStateReducer';
 
 import { AgentVisibility, DatastoreVisibility } from '@chaindesk/prisma';
+import useAgent from '@chaindesk/ui/hooks/useAgent';
+import useStateReducer from '@chaindesk/ui/hooks/useStateReducer';
 
 import SettingCard from './ui/SettingCard';
 import UsageLimitModal from './UsageLimitModal';
@@ -76,6 +76,13 @@ const WhatsAppSettings = dynamic(
   }
 );
 
+const TelegramSettings = dynamic(
+  () => import('@app/components/TelegramSettings'),
+  {
+    ssr: false,
+  }
+);
+
 type Props = {
   agentId: string;
 };
@@ -95,6 +102,7 @@ function AgentDeployTab(props: Props) {
   const standalonePageModal = useModal();
   const zendeskModal = useModal();
   const whatsappModal = useModal();
+  const telegramModal = useModal();
   const shopifyModal = useModal();
 
   const { query, mutation } = useAgent({
@@ -214,6 +222,23 @@ function AgentDeployTab(props: Props) {
                   '_blank'
                 );
               },
+            },
+            {
+              hidden: false,
+              name: 'Telegram',
+              icon: (
+                <Image
+                  className="w-8"
+                  src="/integrations/telegram/icon.svg"
+                  width={100}
+                  height={100}
+                  alt="Telegram Logo"
+                />
+              ),
+              action: async () => {
+                telegramModal.open();
+              },
+              isPremium: true,
             },
             {
               name: 'Slack',
@@ -413,16 +438,31 @@ function AgentDeployTab(props: Props) {
             <StandalonePageWidgetSettings agentId={query?.data?.id!} />
           </standalonePageModal.component>
 
-          {/* <zendeskModal.component
-            title="Zendesk"
+          <telegramModal.component
+            title={
+              <Typography
+                startDecorator={
+                  <Image
+                    className="w-6"
+                    src="/integrations/telegram/icon.svg"
+                    width={100}
+                    height={100}
+                    alt="Telegram Logo"
+                  />
+                }
+              >
+                Telegram
+              </Typography>
+            }
             dialogProps={{
               sx: {
                 maxWidth: 'sm',
+                height: 'auto',
               },
             }}
           >
-            <ZendeskSettings agentId={props.agentId} />
-          </zendeskModal.component> */}
+            <TelegramSettings agentId={props.agentId} />
+          </telegramModal.component>
 
           <whatsappModal.component
             title={

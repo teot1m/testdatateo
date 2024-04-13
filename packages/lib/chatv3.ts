@@ -1,12 +1,13 @@
+import slugify from '@sindresorhus/slugify';
 import {
   ChatCompletionMessageParam,
   ChatCompletionTool,
 } from 'openai/resources';
-import { z } from 'zod';
 
 import {
   Agent,
   AgentModelName,
+  ConversationChannel,
   Message,
   Tool,
   ToolType,
@@ -14,8 +15,7 @@ import {
 
 import { handler as datastoreToolHandler } from './agent/tools/datastore';
 import {
-  createHandler as createFormToolHandler,
-  createParser as createParserFormTool,
+  createHandlerV2 as createFormToolHandlerV2,
   toJsonSchema as formToolToJsonSchema,
 } from './agent/tools/form';
 import {
@@ -68,6 +68,9 @@ import {
 import truncateChatMessages from './truncateChatMessages';
 
 export type ChatProps = ChatModelConfigSchema & {
+  organizationId: string;
+  agentId: string;
+  channel?: ConversationChannel;
   systemPrompt?: string;
   userPrompt?: string;
   query: string;
@@ -83,8 +86,6 @@ export type ChatProps = ChatModelConfigSchema & {
   topK?: number;
   toolsConfig?: ChatRequest['toolsConfig'];
   conversationId?: ChatRequest['conversationId'];
-  organizationId: string;
-  agentId: string;
 
   // Behaviors
   useMarkdown?: boolean;
@@ -113,6 +114,7 @@ const chat = async ({
   useMarkdown,
   useLanguageDetection,
   restrictKnowledge,
+  channel,
   ...otherProps
 }: ChatProps) => {
   // Tools
@@ -153,6 +155,7 @@ const chat = async ({
     throw 'ToolApprovalRequired';
   };
 
+  let messageId = undefined;
   let metadata: object | undefined = undefined;
 
   const baseConfig = {
@@ -164,9 +167,13 @@ const chat = async ({
 
   const createHandler =
     <T extends { type: ToolType }>(handler: CreateToolHandler<T>) =>
-    (tool: ToolSchema & T, config: CreateToolHandlerConfig<T>) =>
+    (
+      tool: ToolSchema & T,
+      config: CreateToolHandlerConfig<T>,
+      channel?: ConversationChannel
+    ) =>
     async (args: ToolPayload<T>) => {
-      const res = await handler(tool, config)(args);
+      const res = await handler(tool, config, channel)(args);
 
       if (res?.approvalRequired) {
         return handleToolWithApproval({
@@ -182,6 +189,10 @@ const chat = async ({
         };
       }
 
+      if (res.messageId) {
+        messageId = res.messageId as string;
+      }
+
       return res?.data;
     };
 
@@ -194,10 +205,7 @@ const chat = async ({
       function: {
         ...httpToolToJsonSchema(each),
         parse: createParserHttpTool(each, config),
-        function: createHandler<{ type: 'http' }>(createHttpToolHandler)(
-          each,
-          config
-        ),
+        function: createHandler(createHttpToolHandler)(each, config),
       },
       // } as RunnableToolFunction<HttpToolPayload>)
     } as ChatCompletionTool;
@@ -210,9 +218,9 @@ const chat = async ({
     return {
       type: 'function',
       function: {
-        ...formToolToJsonSchema(each, config),
-        parse: createParserFormTool(each, config),
-        function: createHandler(createFormToolHandler)(each, config),
+        ...formToolToJsonSchema(each),
+        parse: JSON.parse,
+        function: createHandler(createFormToolHandlerV2)(each, config, channel),
       },
     } as ChatCompletionTool;
   });
@@ -273,12 +281,12 @@ const chat = async ({
 
   // if (userPrompt?.includes('{context}')) {
   retrievalData = await datastoreToolHandler({
-    maxTokens: Math.min(ModelConfig?.[modelName!]?.maxTokens * 0.2, 3000), // limit RAG to max 3K tokens
+    maxTokens: Math.min(ModelConfig?.[modelName!]?.maxTokens * 0.2, 2000), // limit RAG to max 2K tokens
     query: retrievalQuery || query,
     tools: tools,
     filters: filters,
     topK: topK,
-    similarityThreshold: 0.78,
+    similarityThreshold: 0.72,
   });
   // }
 
@@ -290,7 +298,15 @@ const chat = async ({
     })
   ).reverse();
 
-  const model = new ChatModel();
+  const isViaOpenRouter =
+    !!ModelConfig[modelName]?.baseUrl?.includes?.('openrouter');
+
+  const model = new ChatModel({
+    baseURL: ModelConfig[modelName]?.baseUrl,
+    apiKey: isViaOpenRouter
+      ? process.env.OPENROUTER_API_KEY
+      : process.env.OPENAI_API_KEY,
+  });
 
   try {
     // if (!!markAsResolvedTool) {
@@ -316,22 +332,8 @@ const chat = async ({
         : []),
     ].join(' and ');
 
-    const requestHumanInstructions = `If the user is not satisfied with the assistant answers, offer to request a human operator, then if the user accepts call \`request_human\` to request a human to take over the conversation.`;
-    const markAsResolvedInstructions = `If the user is happy with your answer, call \`mark_as_resolved\` to mark the conversation as resolved.`;
-
-    const knowledgeInstructions = `${
-      !!datastoreTools?.length
-        ? `Use the following portion of a long document to see if any of the text is relevant to answer the question. <knowledge-base>${
-            retrievalData?.context
-          }</knowledge-base>
-    ${
-      !!restrictKnowledge
-        ? `Limit your knowledge to the knowledge base, if you don't find an answer in the knowledge base, politely say that you don't know. Remember do not answer any query that is outside of the provided context, this is paramount.`
-        : ``
-    }
-    `
-        : ``
-    }`.trim();
+    const requestHumanInstructions = `If the user is not satisfied with the assistant answers, offer to request a human operator, then if the user accepts use tool \`request_human\` to request a human to take over the conversation.`;
+    const markAsResolvedInstructions = `If the user is happy with your answer, use tool \`mark_as_resolved\` to mark the conversation as resolved.`;
 
     const _systemPrompt = `${systemPrompt}
     ${
@@ -356,7 +358,7 @@ const chat = async ({
     }
     ${
       useLanguageDetection
-        ? `Answer the users question in the same language as the user question. You are able to speak any language.`
+        ? `Answer the users question in the same language as the user question. You can speak all languages.`
         : ``
     }
     ${
@@ -367,7 +369,7 @@ const chat = async ({
     }
     ${!!markAsResolvedTool ? markAsResolvedInstructions : ``}
     ${!!requestHumanTool ? requestHumanInstructions : ``}
-    ${knowledgeInstructions}
+    ${nbDatastoreTools > 0 ? `Knowledge Base: ${retrievalData?.context}` : ``}
     `.trim();
 
     const messages: ChatCompletionMessageParam[] = [
@@ -378,6 +380,20 @@ const chat = async ({
               content: _systemPrompt,
             } as ChatCompletionMessageParam,
           ]
+        : []),
+      ...(nbDatastoreTools > 0
+        ? restrictKnowledge
+          ? ([
+              {
+                role: 'user',
+                content: `Only use previous message to answer my questions. If information to answer my question is not relevant, politely say that you do not know using same the question is asked. I do not want to see misleading answers. Don't try to make up an answer.`,
+              },
+              {
+                role: 'assistant',
+                content: `Ok I will follow your instructions carefully. I will only use the knowledge base you provided to answer your questions. If informations to answer your questions can't be found in the knowledge base or if informations are not complete enough I will politely say that I do not know using the same language the question is asked. I will not generate misleading answers. I will not try to make up an answer.`,
+              },
+            ] as ChatCompletionMessageParam[])
+          : ([] as ChatCompletionMessageParam[])
         : []),
       ...truncatedHistory,
       {
@@ -431,6 +447,23 @@ const chat = async ({
       //   : []),
     ] as ChatCompletionTool[];
 
+    const numberOfMessages =
+      Number(history?.filter((msg) => msg.from === 'human').length) + 1;
+
+    const formToolToCall = formTools.find(
+      (formTool) => formTool.config?.messageCountTrigger === numberOfMessages
+    );
+
+    if (formToolToCall) {
+      // Force the model to use this tool
+      messages.push({
+        role: `user`,
+        content: `Call function \`share-form-${slugify(
+          formToolToCall?.form?.name || ''
+        )}\``,
+      });
+    }
+
     const callParams = {
       handleStream: stream,
       model: ModelConfig[modelName]?.name,
@@ -441,15 +474,11 @@ const chat = async ({
       presence_penalty: otherProps.presencePenalty,
       max_tokens: otherProps.maxTokens,
       signal: abortController?.signal,
-      tools: openAiTools,
-      ...(openAiTools?.length > 0
-        ? {
-            tool_choice: 'auto',
-          }
-        : {}),
+      ...(ModelConfig[modelName].isToolCallingSupported &&
+      openAiTools.length > 0
+        ? { tool_choice: 'auto', tools: openAiTools }
+        : { tools: [] }),
     } as Parameters<typeof model.call>[0];
-
-    console.log('CHAT V3 PAYLOAD', JSON.stringify(callParams, null, 2));
 
     const output = await model.call(callParams);
 
@@ -465,12 +494,23 @@ const chat = async ({
       }),
     };
 
+    // if (metadata && 'shouldDisplayForm' in metadata) {
+    //   return {
+    //     answer: '',
+    //     usage: {},
+    //     approvals,
+    //     sources: [] as Source[],
+    //     metadata,
+    //   };
+    // }
+
     return {
       answer,
       usage,
       sources: retrievalData?.sources || [],
       approvals,
       metadata,
+      messageId,
     } as ChatResponse;
   } catch (err: any) {
     if (err?.message?.includes('ToolApprovalRequired')) {
@@ -480,6 +520,7 @@ const chat = async ({
         approvals,
         sources: [] as Source[],
         metadata,
+        messageId,
       } as ChatResponse;
     } else {
       throw err;
