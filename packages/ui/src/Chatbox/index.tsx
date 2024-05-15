@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
 import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
 
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -7,6 +8,7 @@ import StopRoundedIcon from '@mui/icons-material/StopRounded';
 
 import UnfoldLessOutlinedIcon from '@mui/icons-material/UnfoldLessOutlined';
 import UnfoldMoreOutlinedIcon from '@mui/icons-material/UnfoldMoreOutlined';
+import ArticleTwoToneIcon from '@mui/icons-material/ArticleTwoTone';
 import Alert from '@mui/joy/Alert';
 
 import Button from '@mui/joy/Button';
@@ -23,13 +25,9 @@ import React, { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import InfiniteScroll from 'react-infinite-scroller';
 import { z } from 'zod';
+import { zIndex } from '@chaindesk/ui/embeds/common/utils';
 
-import {
-  AcceptedAudioMimeTypes,
-  AcceptedDocumentMimeTypes,
-  AcceptedImageMimeTypes,
-  AcceptedVideoMimeTypes,
-} from '@chaindesk/lib/accepted-mime-types';
+import { AcceptedMimeTypes } from '@chaindesk/lib/accepted-mime-types';
 
 import { ChatMessage, MessageEvalUnion } from '@chaindesk/lib/types';
 import type { Source } from '@chaindesk/lib/types/document';
@@ -41,17 +39,20 @@ import PoweredBy from '@chaindesk/ui/PoweredBy';
 
 import FileUploader from '@chaindesk/ui/FileUploader';
 import TraditionalForm from '@chaindesk/ui/embeds/forms/traditional';
-
-export const acceptedMimeTypesStr = [
-  ...AcceptedImageMimeTypes,
-  ...AcceptedVideoMimeTypes,
-  ...AcceptedAudioMimeTypes,
-  ...AcceptedDocumentMimeTypes,
-].join(',');
+import Select from '@mui/joy/Select';
+import Option from '@mui/joy/Option';
+import type { Attachment } from '@chaindesk/prisma';
+import useFileUpload from '../hooks/useFileUpload';
+import Typography from '@mui/joy/Typography';
 
 export type ChatBoxProps = {
   messages: ChatMessage[];
-  onSubmit: (message: string, attachments?: File[]) => Promise<any>;
+  onSubmit: (props: {
+    query: string;
+    files?: File[];
+    isDraft?: boolean;
+    attachmentsForAI?: string[];
+  }) => Promise<any>;
   messageTemplates?: string[];
   initialMessage?: string;
   initialMessages?: ChatMessage[];
@@ -84,6 +85,8 @@ export type ChatBoxProps = {
   autoFocus?: boolean;
   agentIconStyle?: React.CSSProperties;
   fromInbox?: boolean;
+  fromDashboard?: boolean;
+  conversationAttachments?: Attachment[];
 };
 
 const Schema = z.object({ query: z.string().min(1) });
@@ -120,7 +123,10 @@ function ChatBox({
   autoFocus,
   agentIconStyle,
   fromInbox,
+  conversationAttachments,
+  fromDashboard,
 }: ChatBoxProps) {
+  const chatboxRef = React.useRef<HTMLDivElement>(null);
   const scrollableRef = React.useRef<HTMLDivElement>(null);
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -129,6 +135,13 @@ function ChatBox({
   // const [ini, setFirstMsg] = useState<ChatMessage>();
   // const [firstMsg, setFirstMsg] = useState<ChatMessage>();
   const [files, setFiles] = useState<File[]>([] as File[]);
+  const { isDragOver } = useFileUpload({
+    ref: chatboxRef,
+    changeCallback: setFiles,
+  });
+  const [attachmentsForAI, setAttachmentsForAI] = useState<string[]>(
+    [] as string[]
+  );
   const [isTextAreaExpanded, setIsTextAreaExpended] = useState(false);
 
   const [hideTemplateMessages, setHideTemplateMessages] = useState(false);
@@ -157,7 +170,11 @@ function ChatBox({
       setHideTemplateMessages(true);
       setIsTextAreaExpended(false);
       methods.reset();
-      await onSubmit(query, files);
+      await onSubmit({
+        query,
+        files,
+        attachmentsForAI,
+      });
       setFiles([]);
     } catch (err) {
     } finally {
@@ -214,6 +231,7 @@ function ChatBox({
 
   return (
     <Stack
+      ref={chatboxRef}
       className="chaindesk-chatbox"
       direction={'column'}
       gap={2}
@@ -231,6 +249,36 @@ function ChatBox({
         position: 'relative',
       }}
     >
+      {isDragOver && (
+        <Stack
+          sx={(t) => ({
+            position: 'absolute',
+            pointerEvents: 'none',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 2,
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 2,
+          })}
+          className="bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-violet-500/80"
+        >
+          <Card color="primary">
+            <Stack
+              sx={{ justifyContent: 'center', alignItems: 'center' }}
+              gap={1}
+            >
+              <ImageRoundedIcon sx={{ opacity: 0.5, fontSize: 32 }} />
+
+              <Typography component="label" level="body-sm" color="neutral">
+                Drop files here
+              </Typography>
+            </Stack>
+          </Card>
+        </Stack>
+      )}
       {typeof isAiEnabled === 'boolean' &&
         !isAiEnabled &&
         messages?.length > 0 && (
@@ -405,48 +453,81 @@ function ChatBox({
             methods.handleSubmit(submit)(e);
           }}
         >
-          {(messageTemplates?.length || 0) > 0 && (
-            <Stack
-              direction="row"
-              gap={1}
-              sx={{
-                // position: 'absolute',
-                // zIndex: 1,
-                // transform: 'translateY(-100%)',
-                // left: '0',
-                // mt: -1,
-                flexWrap: 'nowrap',
-                mb: 1,
-                overflowX: 'auto',
-                maxWidth: '100%',
-
-                scrollbarColor: 'rgba(0,0,0,.1) transparent',
-                '&::-webkit-scrollbar': {
-                  height: '0.4em',
-                },
-                '&::-webkit-scrollbar-track': {
-                  display: 'none',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: 'rgba(0,0,0,.0)',
-                  borderRadius: '20px',
-                },
-              }}
-            >
-              {messageTemplates?.map((each, idx) => (
-                <Button
-                  key={idx}
+          <Stack gap={1}>
+            {isAiEnabled &&
+              conversationAttachments &&
+              conversationAttachments?.length > 0 && (
+                <Select
                   size="sm"
-                  variant="soft"
-                  onClick={() => submit({ query: each })}
-                  sx={{ whiteSpace: 'nowrap' }}
+                  slotProps={{
+                    listbox: {
+                      sx: {
+                        zIndex: zIndex + 1,
+                      },
+                    },
+                  }}
+                  sx={{ mr: 'auto', mb: 0.5 }}
+                  startDecorator={<ArticleTwoToneIcon />}
+                  placeholder="Use uploaded file"
+                  // variant="plain"
+                  className="max-w-full truncate"
+                  multiple
+                  color={attachmentsForAI?.length > 0 ? 'warning' : 'neutral'}
+                  variant={attachmentsForAI?.length > 0 ? 'soft' : 'plain'}
+                  onChange={(_, values) => {
+                    setAttachmentsForAI(values as string[]);
+                  }}
                 >
-                  {each}
-                </Button>
-              ))}
-            </Stack>
-          )}
+                  {conversationAttachments.map((each) => (
+                    <Option key={each.id} value={each.id}>
+                      {each.name}
+                    </Option>
+                  ))}
+                </Select>
+              )}
 
+            {(messageTemplates?.length || 0) > 0 && files?.length <= 0 && (
+              <Stack
+                direction="row"
+                gap={1}
+                sx={{
+                  // position: 'absolute',
+                  // zIndex: 1,
+                  // transform: 'translateY(-100%)',
+                  // left: '0',
+                  // mt: -1,
+                  flexWrap: 'nowrap',
+                  mb: 1,
+                  overflowX: 'auto',
+                  maxWidth: '100%',
+
+                  scrollbarColor: 'rgba(0,0,0,.1) transparent',
+                  '&::-webkit-scrollbar': {
+                    height: '0.4em',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    display: 'none',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,.0)',
+                    borderRadius: '20px',
+                  },
+                }}
+              >
+                {messageTemplates?.map((each, idx) => (
+                  <Button
+                    key={idx}
+                    size="sm"
+                    variant="soft"
+                    onClick={() => submit({ query: each })}
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    {each}
+                  </Button>
+                ))}
+              </Stack>
+            )}
+          </Stack>
           <Stack width="100%" gap={0.5}>
             {topSettings}
 
@@ -472,14 +553,26 @@ function ChatBox({
                     </Chip>
                   ))}
                 </Stack>
-                <Alert
-                  color="warning"
-                  size="sm"
-                  startDecorator={<ErrorRoundedIcon />}
-                >
-                  Currently, uploaded files are intended for human use and will
-                  not be processed by the AI Agent
-                </Alert>
+                <Stack gap={1}>
+                  <Alert
+                    color="warning"
+                    size="sm"
+                    startDecorator={<ErrorRoundedIcon />}
+                  >
+                    Image, audio and video files are not supported by the AI.
+                    Unsupported files will not be processed by the AI.
+                  </Alert>
+                  {fromDashboard && (
+                    <Alert
+                      color="primary"
+                      size="sm"
+                      startDecorator={<ErrorRoundedIcon />}
+                    >
+                      To support image processing, use a vision compatible LLM
+                      (GPT-4 Turbo, Claude 3)
+                    </Alert>
+                  )}
+                </Stack>
               </Stack>
             )}
 
@@ -563,7 +656,15 @@ function ChatBox({
                     })}
 
                   {withFileUpload && (
-                    <FileUploader changeCallback={(f) => setFiles(f)} />
+                    <FileUploader
+                      accept={
+                        AcceptedMimeTypes
+                        // (isAiEnabled
+                        //   ? AcceptedAIEnabledMimeTypes
+                        //   : AcceptedAIDisabledMimeType) || []
+                      }
+                      changeCallback={(f) => setFiles(f)}
+                    />
                   )}
 
                   <Stack direction="row" sx={{ ml: 'auto' }}>

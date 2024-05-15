@@ -1,5 +1,92 @@
 # Changelog
 
+<a name="0.1.344"></a>
+## 0.1.344 (2024-05-13)
+
+### Miscellaneous
+
+- 🎸 gpt-4o [[ae7543b](https://github.com/gmpetrov/databerry/commit/ae7543b27facf05b4c570d185c53c675f70818ee)]
+-  fix pnpm version [[72b7b80](https://github.com/gmpetrov/databerry/commit/72b7b80410203e062b0a8572dd846b5de858a9f1)]
+
+
+<a name="0.1.343"></a>
+## 0.1.343 (2024-05-13)
+
+### Fixed
+
+- 🐛 slow api/conversations query [[def4276](https://github.com/gmpetrov/databerry/commit/def4276ed9858be9c3bd6dc35bd346fd9dbbe7b0)]
+- 🐛 api url typo [[f065380](https://github.com/gmpetrov/databerry/commit/f065380822403b531c9f2ea2d161c5b6bbc147df)]
+- 🐛 crisp operator message ([#383](https://github.com/gmpetrov/databerry/issues/383)) [[fcb2b5d](https://github.com/gmpetrov/databerry/commit/fcb2b5df15e297ead8511c80ba64587d461d7711)]
+- 🐛 doc [[0f506d9](https://github.com/gmpetrov/databerry/commit/0f506d9a5ea376f6b81e5405f48338b4da636405)]
+
+### Miscellaneous
+
+-  typo [[c57d977](https://github.com/gmpetrov/databerry/commit/c57d97751f8ab2d5ee636520bce33055ccb5aa81)]
+- 🤖 add footer link [[f8f0b83](https://github.com/gmpetrov/databerry/commit/f8f0b83f6e6fc5467c48065f0ffaa474950e624e)]
+- 🎸 add createNewConversation method [[0f70ff8](https://github.com/gmpetrov/databerry/commit/0f70ff81c5d8eb11a6e9517aab92a6736d8848e3)]
+
+
+<a name="0.1.342"></a>
+## 0.1.342 (2024-04-16)
+
+### Fixed
+
+- 🐛 optional props [[d913df7](https://github.com/gmpetrov/databerry/commit/d913df7bf8bdecb0d9deee3f3c0d55b1457e6558)]
+
+
+<a name="0.1.341"></a>
+## 0.1.341 (2024-04-16)
+
+### Miscellaneous
+
+- 🎸 handle chatbox drag&amp;drop files [[af5ab92](https://github.com/gmpetrov/databerry/commit/af5ab92e03de78677e0df47eb9370f8ec91e7e8c)]
+
+
+<a name="0.1.340"></a>
+## 0.1.340 (2024-04-16)
+
+### Fixed
+
+- 🐛 layout use fileupload [[1fbebaa](https://github.com/gmpetrov/databerry/commit/1fbebaa5246b3cdf2e6b3913ea7c56fec73d740e)]
+- ✏️ conversation file upload doc [[a4064e6](https://github.com/gmpetrov/databerry/commit/a4064e66ea728fc8df5abf863da593ee7c358f65)]
+
+
+<a name="0.1.339"></a>
+## 0.1.339 (2024-04-16)
+
+### Miscellaneous
+
+-  Feature/chat with converstaion attachments ([#378](https://github.com/gmpetrov/databerry/issues/378)) [[4fb88c2](https://github.com/gmpetrov/databerry/commit/4fb88c26a8878698201cc0adc62f0018de9d7820)]
+
+
+<a name="0.1.338"></a>
+## 0.1.338 (2024-04-15)
+
+### Fixed
+
+- 🐛 show form url only if published [[b3e3d07](https://github.com/gmpetrov/databerry/commit/b3e3d07fe521aeb25783385a14d6e511945c77a9)]
+
+
+<a name="0.1.337"></a>
+## 0.1.337 (2024-04-15)
+
+### Fixed
+
+- 🐛 rollback useDeepCompareEFfect + fix mapping props [[7e69544](https://github.com/gmpetrov/databerry/commit/7e69544a01eaa022bcff24c0ff29cf8f6dca3bad)]
+- 🐛 logos urls [[09c4f8b](https://github.com/gmpetrov/databerry/commit/09c4f8bc0e4f7d4ce69fddae06536f50cdbe8245)]
+- 🐛 blog links + force light theme [[04fbd9b](https://github.com/gmpetrov/databerry/commit/04fbd9b06ffa7f05feddb3fb5a4cd419df2e8534)]
+- 🐛 imports typpo [[369e4d0](https://github.com/gmpetrov/databerry/commit/369e4d0c944b2a77cdb8f5055e03a2c238481300)]
+- 🐛 blog package name [[82c0915](https://github.com/gmpetrov/databerry/commit/82c09159a0db9105d53c26cd0fe28d84721465bb)]
+
+### Miscellaneous
+
+- 🤖 add discord link to blog [[60c6c75](https://github.com/gmpetrov/databerry/commit/60c6c753ed86381cf37978c49590d40a91dc8bc1)]
+-  add blog link to footer [[6ab3dd7](https://github.com/gmpetrov/databerry/commit/6ab3dd765033e6f26580e883cd3e8988fe6ca1eb)]
+- 🎸 migrate blog in monorepo _ [[f7ce00e](https://github.com/gmpetrov/databerry/commit/f7ce00eab63e023b15d25be134cfbf1f3e160ba8)]
+- 🤖 add missing meta tags [[bc8db3d](https://github.com/gmpetrov/databerry/commit/bc8db3da7636f336df6c68e8b23fd3184e07fa21)]
+- 🤖 wording [[89e703a](https://github.com/gmpetrov/databerry/commit/89e703a37caacf3c24ed546549f6f286d62b862c)]
+
+
 <a name="0.1.336"></a>
 ## 0.1.336 (2024-04-13)
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 
-import { ChatMessage } from '@chaindesk/lib/types';
+import { ChatboxEvent, ChatMessage } from '@chaindesk/lib/types';
 import { LeadCaptureToolchema } from '@chaindesk/lib/types/dtos';
 import { AgentInterfaceConfig } from '@chaindesk/lib/types/models';
 import { Agent, Subscription, SubscriptionPlan, Tool } from '@chaindesk/prisma';
@@ -58,6 +58,7 @@ function ChatBoxLoader(props: ChatBoxStandardProps) {
     isLoadingConversation,
     hasMoreMessages,
     handleAbort,
+    conversationAttachments,
     handleChatSubmit,
     handleLoadMoreMessages,
     handleEvalAnswer,
@@ -224,6 +225,24 @@ function ChatBoxLoader(props: ChatBoxStandardProps) {
     }, [] as ChatMessage[]);
   }, [leadForm, history, leadToolConfig, hasCapturedLead, isStreaming]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    document.addEventListener(
+      ChatboxEvent.CREATE_NEW_CONVERSATION,
+      methods.createNewConversation as any
+    );
+
+    return () => {
+      document.removeEventListener(
+        ChatboxEvent.CREATE_NEW_CONVERSATION,
+        methods.createNewConversation as any
+      );
+    };
+  }, [methods.createNewConversation]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -260,6 +279,7 @@ function ChatBoxLoader(props: ChatBoxStandardProps) {
           readOnly: leadToolConfig?.isRequired && !hasCapturedLead,
           hideInternalSources: true,
           withFileUpload: true,
+          conversationAttachments,
         },
       } as ChatBaseProps)}
     </ChatContext.Provider>

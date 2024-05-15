@@ -5,6 +5,7 @@ const config = {
   datasourceTable: {
     limit: 20,
   },
+  demoBookingURL: 'https://calendar.app.google/C65KZcdgA9SBYQfBA',
 };
 
 export const XPBNPLabels = {
@@ -24,6 +25,7 @@ export const ModelConfig: Record<
     baseUrl?: string;
     isVisionSupported?: boolean;
     isToolCallingSupported?: boolean;
+    hasVision?: boolean;
     icon?: string;
   }
 > = {
@@ -71,6 +73,7 @@ export const ModelConfig: Record<
     providerPricePriceByOutputToken: 0.00003,
     isToolCallingSupported: true,
     icon: '/shared/images/logos/openai.svg',
+    hasVision: true,
   },
   [AgentModelName.gpt_4_turbo_vision]: {
     name: 'gpt-4-turbo',
@@ -80,6 +83,17 @@ export const ModelConfig: Record<
     providerPricePriceByOutputToken: 0.00003,
     isToolCallingSupported: true,
     icon: '/shared/images/logos/openai.svg',
+    hasVision: true,
+  },
+  [AgentModelName.gpt_4o]: {
+    name: 'gpt-4o',
+    maxTokens: 128000,
+    cost: 10,
+    providerPriceByInputToken: 0.000005,
+    providerPricePriceByOutputToken: 0.000015,
+    isToolCallingSupported: true,
+    icon: '/shared/images/logos/openai.svg',
+    hasVision: true,
   },
   [AgentModelName.claude_3_haiku]: {
     name: 'anthropic/claude-3-haiku:beta',
@@ -90,6 +104,7 @@ export const ModelConfig: Record<
     providerPricePriceByOutputToken: 0.00000125,
     isToolCallingSupported: false,
     icon: '/shared/images/logos/anthropic.svg',
+    hasVision: true,
   },
   [AgentModelName.claude_3_sonnet]: {
     name: 'anthropic/claude-3-sonnet:beta',
@@ -100,6 +115,7 @@ export const ModelConfig: Record<
     providerPricePriceByOutputToken: 0.000015,
     isToolCallingSupported: false,
     icon: '/shared/images/logos/anthropic.svg',
+    hasVision: true,
   },
   [AgentModelName.claude_3_opus]: {
     name: 'anthropic/claude-3-opus:beta',
@@ -110,6 +126,7 @@ export const ModelConfig: Record<
     providerPricePriceByOutputToken: 0.000075,
     isToolCallingSupported: false,
     icon: '/shared/images/logos/anthropic.svg',
+    hasVision: true,
   },
   [AgentModelName.mixtral_8x7b]: {
     name: 'mistralai/mixtral-8x7b',
